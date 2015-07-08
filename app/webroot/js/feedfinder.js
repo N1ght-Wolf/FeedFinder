@@ -11,27 +11,14 @@ $(".date_form").datepicker({
 
   $('#from_datepicker').datepicker('setDate',new Date(2012,0,01));
 
-  plotGraphs('reviews','graph_div');
 
   $('#date_span').on('change',function(){
-        alert($('#query_form').serialize());
+        plotGraphs('date_range','graph_chart');
   });
 
   $('#query_form').submit(function() {
     form_data = $('#query_form').serialize();
-    alert(form_data);
-    $.ajax({
-      type: 'GET',
-      dataType: "json",
-      data:form_data,
-      url: getBaseURL() + '/feed_finder_transactions/' + 'reviews',
-      success: function(data) {
-        plotGraphs('reviews','graph_div');
-      },
-      error: function(xhr, error, textStatus) {
-        alert(textStatus);
-      }
-    });
+    plotGraphs('date_range','graph_div');
     return false;
   });
 
@@ -43,39 +30,39 @@ $(".date_form").datepicker({
 
 function plotGraphs(url, chartDiv){
   form_data = $('#query_form').serialize();
-
+  alert(url);
   $.ajax({
     type: 'GET',
     dataType: "json",
     data:form_data,
     url: getBaseURL() + '/feed_finder_transactions/' + url,
     success: function(data) {
-
-    chart = new Highcharts.Chart({
-      chart: {
-          renderTo: chartDiv,
-          type: 'line'
-      },
-      title: {
-          text: 'reviews'
-      },
-      xAxis: {
-          categories: data.month
-      },
-      yAxis: {
-          title: {
-              text: 'Reviews'
-          },
-          min:0
-      },
-      series: [{
-          name: 'reviews',
-          data: data.counts
-      }]
-    });
+      console.log(data);
+    // chart = new Highcharts.Chart({
+    //   chart: {
+    //       renderTo: chartDiv,
+    //       type: 'line'
+    //   },
+    //   title: {
+    //       text: 'reviews'
+    //   },
+    //   xAxis: {
+    //       categories: data.month
+    //   },
+    //   yAxis: {
+    //       title: {
+    //           text: 'Reviews'
+    //       },
+    //       min:0
+    //   },
+    //   series: [{
+    //       name: 'reviews',
+    //       data: data.counts
+    //   }]
+    // });
 },
 error: function(xhr, error, textStatus) {
-  alert(textStatus);
+  alert(xhr.status);
 }
 });
 }

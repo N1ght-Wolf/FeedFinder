@@ -9,7 +9,7 @@ App::uses('Model', 'Model');
  *
  * @package       app.Model
  */
-class SiteUsageLog extends Model {
+class Venue extends Model {
 
 }
 

@@ -23,54 +23,26 @@ class FeedFinderTransactionsController extends AppController
 
     public function index()
     {
-
-    $this->set('date',$this->date);
+        $this->set('date',$this->date);
 
     }
 
-    public function reviews(){
-      $this->autoRender = false;
-       $this->request->onlyAllow('ajax');
+    public function date_range(){
+      $this->autoRender =false;
+      if ($this->request->is('ajax'))
+       {
+         $select_index = $this->request->query('date span');
 
-      if($this->request->is('ajax')){
-        $from = $this->request->query('from');
-        $to = $this->request->query('to');
-        $compare= $this->request->query('compare');
-
-        $result = $this->FeedFinderTransaction->find('all',
-        array('fields'=>array('FeedFinderTransaction.created'),
-              'order'=>'FeedFinderTransaction.created',
-              'conditions'=>array('FeedFinderTransaction.action'=>'review',
-                                  'FeedFinderTransaction.created >= '=> $from,
-                                  'FeedFinderTransaction.created <= '=>$to)));
-
-            $to_json = $this->_calc_graph_data($result);
-            echo json_encode($to_json);
-    }
-    }
-
-    public function most_active(){
-
-      $this->autoRender = false;
-       $this->request->onlyAllow('ajax');
-      if($this->request->is('ajax')){
-        $from = $this->request->query('from');
-        $to = $this->request->query('to');
-        $this->paginate =
-        array('fields'=>array('FeedFinderTransaction.user_id, count(user_id)'),
-              'order'=>'mycount DESC',
+         $result = $this->FeedFinderTransaction->find('all',
+               array('fields'=>array('FeedFinderTransaction.user_id,count(FeedFinderTransaction.user_id) as myCount,FeedFinderTransaction.email,FeedFinderTransaction.lat,FeedFinderTransaction.lng'),
+              'order'=>'myCount','conditions'=>array('FeedFinderTransaction.action'=>'review',
               'group'=>'FeedFinderTransaction.user_id',
-              'limit'=>5,
-              'conditions'=>array('FeedFinderTransaction.action'=>'review',
-                                  'FeedFinderTransaction.created >= '=> $from,
-                                  'FeedFinderTransaction.created <= '=>$to));
-                                  $result = $this->paginate('FeedFinderTransaction');
+                                  'FeedFinderTransaction.created >= NOW() - INTERVAL 3 MONTH')));
+               echo json_encode($result);
 
-                                  $this->set('users',$result);
-    }
+      }
 
     }
-
 
 
 

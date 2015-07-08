@@ -11,8 +11,8 @@
 
 <div id="form_div">
   <?php
-  echo $this->Form->create('FeedFinderTransactions',
-  array('id' => 'query_form', 'type' => 'GET'));
+  echo $this->Form->create(
+  array('id' => 'query_form', 'type' => 'GET', 'action'=>'index'));
 
   // echo $this->Form->input('from',
   //         array(
