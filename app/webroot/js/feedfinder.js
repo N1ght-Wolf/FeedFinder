@@ -13,14 +13,34 @@ $(".date_form").datepicker({
 
 
   $('#date_span').on('change',function(){
-        plotGraphs('date_range','graph_chart');
+    form_data = $('#query_form').serialize();
+
+        $.ajax({
+          type: 'GET',
+          dataType: "json",
+          data:form_data,
+          url: getBaseURL() + '/feed_finder_transactions/' + 'date_range',
+          success: function(data) {
+            console.log(data);
+          },
+          error: function(error){
+            alert('failed! :P');
+          }
+          });
   });
 
-  $('#query_form').submit(function() {
+
+  $('#actions').on('change',function(){
     form_data = $('#query_form').serialize();
-    plotGraphs('date_range','graph_div');
-    return false;
+    plotGraphs('action_graph_data','graph_div');
   });
+
+
+  // $('#query_form').submit(function() {
+  //   form_data = $('#query_form').serialize();
+  //   plotGraphs('date_range','graph_div');
+  //   return false;
+  // });
 
 
 
@@ -30,7 +50,7 @@ $(".date_form").datepicker({
 
 function plotGraphs(url, chartDiv){
   form_data = $('#query_form').serialize();
-  alert(url);
+  // alert(url);
   $.ajax({
     type: 'GET',
     dataType: "json",
@@ -38,28 +58,28 @@ function plotGraphs(url, chartDiv){
     url: getBaseURL() + '/feed_finder_transactions/' + url,
     success: function(data) {
       console.log(data);
-    // chart = new Highcharts.Chart({
-    //   chart: {
-    //       renderTo: chartDiv,
-    //       type: 'line'
-    //   },
-    //   title: {
-    //       text: 'reviews'
-    //   },
-    //   xAxis: {
-    //       categories: data.month
-    //   },
-    //   yAxis: {
-    //       title: {
-    //           text: 'Reviews'
-    //       },
-    //       min:0
-    //   },
-    //   series: [{
-    //       name: 'reviews',
-    //       data: data.counts
-    //   }]
-    // });
+    chart = new Highcharts.Chart({
+      chart: {
+          renderTo: chartDiv,
+          type: 'line'
+      },
+      title: {
+          text: 'reviews'
+      },
+      xAxis: {
+          categories: data.month
+      },
+      yAxis: {
+          title: {
+              text: 'Reviews'
+          },
+          min:0
+      },
+      series: [{
+          name: 'reviews',
+          data: data.counts
+      }]
+    });
 },
 error: function(xhr, error, textStatus) {
   alert(xhr.status);

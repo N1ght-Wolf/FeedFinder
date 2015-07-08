@@ -18,33 +18,138 @@ class FeedFinderTransactionsController extends AppController
     public $layout = 'Highcharts.chart.demo';
     public $Highcharts = null;
 
-    private $date = array('Lifetime','This week','This month','Last month','3 months','6 months','custom');
+    private $date = array('Life time','Today','Yesterday','This week','Last week','This month',
+                          'Last month','3 month','6 month','custom');
+
+    public $actions = array('add_existing_venue'=>'add existing venue',
+    'add_new_venue'=>'add new venue',
+    'agreement_post'=>'agreement post',
+    'auth'=>'authentication',
+    'change_password_post'=>'change password',
+    'forgotten_post'=>'forgot password',
+    'register'=>'register',
+    'review'=>'review',
+    'survey'=>'survey',
+    'survey_get'=>'survey get',
+    'venues'=>'venues',
+    'venue_get'=>'venue get',
+    'verified_password'=>'verified password');
+
 
 
     public function index()
     {
-        $this->set('date',$this->date);
+      $this->set('date_options',$this->date);
 
+      $this->set('actions', $this->actions);
+      $select_index = $this->request->query('date_span');
+      $this->_print_array(array_keys($this->actions));
     }
 
     public function date_range(){
       $this->autoRender =false;
       if ($this->request->is('ajax'))
        {
-         $select_index = $this->request->query('date span');
+         $select_index = $this->request->query('date_span');
 
-         $result = $this->FeedFinderTransaction->find('all',
-               array('fields'=>array('FeedFinderTransaction.user_id,count(FeedFinderTransaction.user_id) as myCount,FeedFinderTransaction.email,FeedFinderTransaction.lat,FeedFinderTransaction.lng'),
-              'order'=>'myCount','conditions'=>array('FeedFinderTransaction.action'=>'review',
-              'group'=>'FeedFinderTransaction.user_id',
-                                  'FeedFinderTransaction.created >= NOW() - INTERVAL 3 MONTH')));
-               echo json_encode($result);
+         $query_array = array('fields'=>array('FeedFinderTransaction.user_id,FeedFinderTransaction.email,
+         FeedFinderTransaction.lat,FeedFinderTransaction.lng, count(FeedFinderTransaction.user_id) as mycount'),
+        'order'=>'mycount DESC',
+        'group'=>'FeedFinderTransaction.user_id');
+
+          switch ($select_index) {
+            case 0://Lifetime
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 1: //Today
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                     'DATE(FeedFinderTransaction.created) = CURRENT_DATE');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 2://yesterday
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                     'DATE(FeedFinderTransaction.created) = CURRENT_DATE - INTERVAL 1 DAY');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 3://this week
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                     'FeedFinderTransaction.created > DATE_SUB(NOW(), INTERVAL 1 WEEK)');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 4: //last week
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                    'FeedFinderTransaction.created >= CURRENT_DATE() - INTERVAL DAYOFWEEK(CURRENT_DATE())+6 DAY',
+                                                    'FeedFinderTransaction.created < CURRENT_DATE() - INTERVAL DAYOFWEEK(CURDATE())-1 DAY');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 5://this month
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                     'YEAR (FeedFinderTransaction.created) = YEAR(CURRENT_DATE())',
+                                                     'MONTH(FeedFinderTransaction.created) = MONTH(CURRENT_DATE())');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 6: // last month
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                     'YEAR (FeedFinderTransaction.created) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)',
+                                                     'MONTH(FeedFinderTransaction.created) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 7:// 3 months
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                     'FeedFinderTransaction.created >= NOW() - INTERVAL 3 month');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 8: // 6 months
+                  $query_array['conditions'] = array('FeedFinderTransaction.action'=>'review',
+                                                     'FeedFinderTransaction.created >= NOW() - INTERVAL 6 month');
+                  $result = $this->FeedFinderTransaction->find('all',$query_array);
+                  echo json_encode($result);
+            break;
+
+            case 9:
+                  // to do !!!!
+            break;
+            default:
+              # code...
+              break;
+          }
+
+
 
       }
 
     }
 
 
+    public function action_graph_data(){
+      $this->autoRender = false;
+      if($this->request->is('ajax')){
+        $selected_action =  $this->request->query['actions'];
+        $result = $this->FeedFinderTransaction->
+        find('all',array('fields'=>array('FeedFinderTransaction.created'),
+                         'order'=>'FeedFinderTransaction.created',
+                         'conditions'=>array('FeedFinderTransaction.action '=> $selected_action)));
+
+        echo json_encode($this->_calc_graph_data($result));
+      }
+    }
 
 
 

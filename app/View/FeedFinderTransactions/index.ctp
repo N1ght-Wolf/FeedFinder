@@ -9,6 +9,8 @@
 
 </div>
 
+
+
 <div id="form_div">
   <?php
   echo $this->Form->create(
@@ -25,10 +27,10 @@
   //           'id'=> 'to_datepicker',
   //            'class' => 'date_form',
   //            'type' => 'text'));
-
-
   echo $this->Form->input('date span', array('type' => 'select','label'=>'date span','id'=>'date_span',
-  'options'=>$date));
+  'options'=>$date_options));
+  echo $this->Form->input('actions', array('type' => 'select','label'=>'actions','id'=>'actions',
+  'options'=>$actions));
 
 
 
