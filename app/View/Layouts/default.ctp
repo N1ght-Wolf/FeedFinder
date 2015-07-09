@@ -1,3 +1,5 @@
+<h1>OH HAI</h1>
+
 <?php
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
