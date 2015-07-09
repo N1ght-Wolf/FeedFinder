@@ -12,25 +12,25 @@ $(".date_form").datepicker({
   $('#from_datepicker').datepicker('setDate',new Date(2012,0,01));
 
 
-  $('#date_span').on('change',function(){
-    form_data = $('#query_form').serialize();
+  // $('#date_span').on('change',function(){
+  //   form_data = $('#query_form').serialize();
+  //
+  //       $.ajax({
+  //         type: 'GET',
+  //         dataType: "json",
+  //         data:form_data,
+  //         url: getBaseURL() + '/feed_finder_transactions/' + 'date_range',
+  //         success: function(data) {
+  //           console.log(data);
+  //         },
+  //         error: function(error){
+  //           alert('failed! :P');
+  //         }
+  //         });
+  // });
 
-        $.ajax({
-          type: 'GET',
-          dataType: "json",
-          data:form_data,
-          url: getBaseURL() + '/feed_finder_transactions/' + 'date_range',
-          success: function(data) {
-            console.log(data);
-          },
-          error: function(error){
-            alert('failed! :P');
-          }
-          });
-  });
 
-
-  $('#actions').on('change',function(){
+  $('#actions, #date_span').on('change',function(){
     form_data = $('#query_form').serialize();
     plotGraphs('action_graph_data','graph_div');
   });
