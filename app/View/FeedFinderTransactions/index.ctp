@@ -5,7 +5,10 @@
 <?php echo $this->Html->css('feedfinder'); ?>
 
 
-<div id="graph_div" style="width:50%; height:500px;">
+<div id="graph_div" style="width:50%; height:300px;">
+
+</div>
+<div id="pie_div" style="width:50%; height:300px;">
 
 </div>
 
@@ -13,28 +16,18 @@
 
 <div id="form_div">
   <?php
-  echo $this->Form->create(
-  array('id' => 'query_form', 'type' => 'GET', 'action'=>'index'));
+  echo $this->Form->create(array('id' => 'query_form', 'type' => 'GET'));
 
-  // echo $this->Form->input('from',
-  //         array(
-  //             'id'=>'from_datepicker',
-  //            'class' => 'date_form',
-  //            'type' => 'text',
-  //            'label' => 'from'));
-  // echo $this->Form->input('to',
-  //         array(
-  //           'id'=> 'to_datepicker',
-  //            'class' => 'date_form',
-  //            'type' => 'text'));
-  echo $this->Form->input('date span', array('type' => 'select','label'=>'date span','id'=>'date_span',
-  'options'=>$date_options));
+  echo $this->Form->input('timespan', array('type' => 'select','label'=>'timespan','id'=>'timespan',
+  'options'=>$timespan_options));
+
   echo $this->Form->input('actions', array('type' => 'select','label'=>'actions','id'=>'actions',
   'options'=>$actions));
 
-
-
   echo $this->Form->end('go');
 
+
+
    ?>
+   
 </div>

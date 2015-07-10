@@ -1,94 +1,56 @@
-var chart;
 $(document).ready(function() {
+  //date picker stuff
+	$(".date_form").datepicker({
 
-$(".date_form").datepicker({
+		changeYear: true,
+		changeMonth: true,
+		dateFormat: "yy-mm-dd",
+	}).datepicker('setDate', new Date());
 
-  	changeYear: true,
-  	changeMonth: true,
-  	dateFormat: "yy-mm-dd",
-  }).datepicker('setDate', new Date());
+	$('#from_datepicker').datepicker('setDate', new Date(2012, 0, 01));
 
-
-  $('#from_datepicker').datepicker('setDate',new Date(2012,0,01));
-
-
-  // $('#date_span').on('change',function(){
-  //   form_data = $('#query_form').serialize();
-  //
-  //       $.ajax({
-  //         type: 'GET',
-  //         dataType: "json",
-  //         data:form_data,
-  //         url: getBaseURL() + '/feed_finder_transactions/' + 'date_range',
-  //         success: function(data) {
-  //           console.log(data);
-  //         },
-  //         error: function(error){
-  //           alert('failed! :P');
-  //         }
-  //         });
-  // });
-
-
-  $('#actions, #date_span').on('change',function(){
-    form_data = $('#query_form').serialize();
-    plotGraphs('action_graph_data','graph_div');
+  $('#timespan,  #actions').on('change',function(){
+      form_data = $('#query_form').serialize();
+      alert(form_data);
+      $.ajax({
+        type: 'GET',
+        dataType: "json",
+        data:form_data,
+        url: getBaseURL() + '/feed_finder_transactions/' + 'action',
+        success: function(data) {
+          chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'graph_div',
+                    type: 'line'
+                },
+                title: {
+                    text: 'reviews'
+                },
+                xAxis: {
+                    categories: data.month
+                },
+                yAxis: {
+                    title: {
+                        text: 'Reviews'
+                    },
+                    min:0
+                },
+                series: [{
+                    name: 'reviews',
+                    data: data.counts
+                }]
+              });
+                    },
+        error: function(jqXHR, textStatus, errorThrown) {
+        console.log(textStatus, errorThrown);
+        }
+      });
   });
 
 
-  // $('#query_form').submit(function() {
-  //   form_data = $('#query_form').serialize();
-  //   plotGraphs('date_range','graph_div');
-  //   return false;
-  // });
-
-
 
 
 });
-
-
-function plotGraphs(url, chartDiv){
-  form_data = $('#query_form').serialize();
-  // alert(url);
-  $.ajax({
-    type: 'GET',
-    dataType: "json",
-    data:form_data,
-    url: getBaseURL() + '/feed_finder_transactions/' + url,
-    success: function(data) {
-      console.log(data);
-    chart = new Highcharts.Chart({
-      chart: {
-          renderTo: chartDiv,
-          type: 'line'
-      },
-      title: {
-          text: 'reviews'
-      },
-      xAxis: {
-          categories: data.month
-      },
-      yAxis: {
-          title: {
-              text: 'Reviews'
-          },
-          min:0
-      },
-      series: [{
-          name: 'reviews',
-          data: data.counts
-      }]
-    });
-},
-error: function(xhr, error, textStatus) {
-  alert(xhr.status);
-}
-});
-}
-
-
-
 
 
 
