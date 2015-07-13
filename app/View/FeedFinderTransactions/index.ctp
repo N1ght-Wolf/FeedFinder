@@ -1,17 +1,25 @@
+<?php echo $this->Html->script('jquery'); ?>
 <?php echo $this->Html->script('jquery-ui'); ?>
-<?php echo $this->Html->script('Chart'); ?>
 <?php echo $this->Html->script('feedfinder'); ?>
 <?php echo $this->Html->css('jquery-ui'); ?>
 <?php echo $this->Html->css('feedfinder'); ?>
+<?php echo $this->Html->script('highmaps'); ?>
 
 
 <div id="graph_div" style="width:50%; height:300px;">
 
 </div>
-<div id="pie_div" style="width:50%; height:300px;">
+
+<div id="geo_div" style="width:50%; height:300px;">
 
 </div>
 
+<div id="pie_div" style="width:50%; height:300px;">
+
+</div>
+<div id = 'basic_counts'>
+
+</div>
 
 
 <div id="form_div">
@@ -22,12 +30,12 @@
   'options'=>$timespan_options));
 
   echo $this->Form->input('actions', array('type' => 'select','label'=>'actions','id'=>'actions',
-  'options'=>$actions));
+  'options'=>$actions,'default'=>2));
 
   echo $this->Form->end('go');
 
 
 
    ?>
-   
+
 </div>

@@ -12,14 +12,14 @@ App::uses('CakeTime', 'Utility');
  */
 class FeedFinderTransactionsController extends AppController
 {
-    public $components = array('Session','Highcharts.Highcharts','RequestHandler');
+    public $components = array('Session','RequestHandler');
     public $helpers = array('Session', 'Html', 'Form','Js' => array('jquery'));
-    public $uses = array('Venue','FeedFinderTransaction');
-    public $layout = 'Highcharts.chart.demo';
-    public $Highcharts = null;
+    public $uses = array('Venue','FeedFinderTransaction','UserLookupTable');
+    // public $layout = 'Highcharts.chart.demo';
 
     private $timespan_options = array('Life time','Today','Yesterday','This week','Last week','This month',
                           'Last month','3 month','6 month','custom', );
+
     public $actions = array('add existing venue',
     'add new venue',
     'review',
@@ -33,10 +33,11 @@ class FeedFinderTransactionsController extends AppController
     {
         $this->set('timespan_options', $this->timespan_options);
         $this->set('actions', $this->actions);
-
+        $result = $this->UserLookupTable->find('count');
+   $this->_print_array($result);
     }
 
-    public function action()
+    public function actions()
     {
       $this->autoRender = false;
       if($this->request->is('ajax'))
@@ -49,6 +50,23 @@ class FeedFinderTransactionsController extends AppController
               'order'=>'FeedFinderTransaction.created',
               'conditions'=>$conditions));
         echo json_encode($this->_calc_graph_data($result));
+      }
+    }
+
+    public function basic_data_counts(){
+      $this->autoRender = false;
+      if($this->request->is('ajax')){
+      $counts = array();
+      $counts['review'] =$this->FeedFinderTransaction->find('count',array('conditions'=>array(
+                                                         'FeedFinderTransaction.action'=>'review')));
+
+      $counts['register']=$this->FeedFinderTransaction->find('count',array('conditions'=>array(
+                                                        'FeedFinderTransaction.action'=>'register')));
+      $counts['venues'] = $this->Venue->find('count');
+
+      $counts['users']=$this->UserLookupTable->find('count');
+
+        echo json_encode($counts);
       }
     }
 
