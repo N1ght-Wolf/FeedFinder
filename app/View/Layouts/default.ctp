@@ -23,6 +23,9 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 	<?php echo $this->Html->charset();
     ?>
 		<?php
+		$this->Html->script('https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization', false);
+		$this->Html->script('http://www.google.com/jsapi', false);
+
           echo $this->fetch('meta');
           echo $this->fetch('css');
           echo $this->fetch('script');

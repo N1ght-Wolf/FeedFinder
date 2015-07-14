@@ -33,8 +33,12 @@ class FeedFinderTransactionsController extends AppController
     {
         $this->set('timespan_options', $this->timespan_options);
         $this->set('actions', $this->actions);
-        $result = $this->UserLookupTable->find('count');
-   $this->_print_array($result);
+        $result = $this->FeedFinderTransaction->find('all',array('conditions'=>array("FeedFinderTransaction.venue_id
+         IN (SELECT `id` FROM `venues` WHERE `country` = 'United Kingdom') ")));
+        //$this->_print_array($result);
+        // $json = file_get_contents('http://code.highcharts.com/mapdata/countries/gb/gb-all.geo.json');
+        // $obj = json_decode($json,true);
+        // $this->_print_array($obj['features']);
     }
 
     public function actions()
@@ -67,6 +71,29 @@ class FeedFinderTransactionsController extends AppController
       $counts['users']=$this->UserLookupTable->find('count');
 
         echo json_encode($counts);
+      }
+    }
+
+    public function fetchRelevantData(){
+      $this->autoRender =false;
+
+      if($this->request->is('ajax')){
+        $lat = $this->request->data('lat');
+        $lon =  $this->request->data('lng');
+        $rad =5; $R = 6371;
+        //src http://www.movable-type.co.uk/scripts/latlong-db.html
+        $maxLat = $lat + rad2deg($rad/$R);
+        $minLat = $lat - rad2deg($rad/$R);
+
+        $maxLon = $lon + rad2deg($rad/$R/cos(deg2rad($lat)));
+        $minLon = $lon - rad2deg($rad/$R/cos(deg2rad($lat)));
+
+        $query_result = $this->FeedFinderTransaction->find('all',array(
+          'fields'=>array('FeedFinderTransaction.lat','FeedFinderTransaction.lng'),
+          'conditions'=>array("FeedFinderTransaction.lat BETWEEN $minLat AND $maxLat",
+                             "FeedFinderTransaction.lng BETWEEN $minLon AND $maxLon")));
+          // $arrayName = array('lat' => $lat,'lng'=>$lng );
+         echo json_encode($query_result);
       }
     }
 

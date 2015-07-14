@@ -1,16 +1,17 @@
 <?php echo $this->Html->script('jquery'); ?>
 <?php echo $this->Html->script('jquery-ui'); ?>
-<?php echo $this->Html->script('feedfinder'); ?>
+<?php echo $this->Html->script('highmaps'); ?>
+<?php echo $this->Html->script('graph'); ?>
+<?php echo $this->Html->script('map'); ?>
 <?php echo $this->Html->css('jquery-ui'); ?>
 <?php echo $this->Html->css('feedfinder'); ?>
-<?php echo $this->Html->script('highmaps'); ?>
 
 
 <div id="graph_div" style="width:50%; height:300px;">
 
 </div>
 
-<div id="geo_div" style="width:50%; height:300px;">
+<div id="geo_div" style="width:50%; height:500px;">
 
 </div>
 
@@ -31,6 +32,8 @@
 
   echo $this->Form->input('actions', array('type' => 'select','label'=>'actions','id'=>'actions',
   'options'=>$actions,'default'=>2));
+
+
 
   echo $this->Form->end('go');
 
