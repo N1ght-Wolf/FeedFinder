@@ -4,11 +4,10 @@ var defaultLng, defaultLat;
 
 $(document).ready(function(){
 
-  //Start geolocation
+  //start geo location for the heat map
   getUserLocation();
-
-
-
+  //start auto complete for region
+  google.maps.event.addDomListener(window, 'load', autoCompleteRegion);
 });
 
 function getUserLocation(){
@@ -35,16 +34,15 @@ function getUserLocation(){
   //End Geo location
 }
 
-// function reverseGeocode(coordinate){
-//   lat = coordinate.latitude;
-//   long = coordinate.longitude;
-//   $.ajax({ url:'http://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+long+'&sensor=true',
-//          success: function(data){
-//               console.log(data);
-//               fetchRelevantData(data);
-//          }
-//        });
-// }
+function reverseGeocode(region){
+
+  $.ajax({ url:'http://maps.googleapis.com/maps/api/geocode/json?region='+region,
+         success: function(data){
+              console.log(data);
+              fetchRelevantData(data);
+         }
+       });
+}
 
 function initialize(data) {
 
@@ -62,7 +60,7 @@ function initialize(data) {
    zoom:10,
    mapTypeId:google.maps.MapTypeId.ROADMAP
  };
- map=new google.maps.Map(document.getElementById("geo_div"),mapProp);
+ map=new google.maps.Map(document.getElementById("map-canvas"),mapProp);
 
 
   var pointArray = new google.maps.MVCArray(markerLatLngArray);
@@ -95,6 +93,16 @@ function fetchRelevantData(data){
 }
 function changeRadius() {
   heatmap.set('radius', heatmap.get('radius') ? null : 10);
+}
+
+function autoCompleteRegion(){
+  var options = {
+                types: ['(regions)']
+            };
+  var input = document.getElementById('location');
+  var autocomplete = new google.maps.places.Autocomplete(input , options);
+
+
 }
 
 function getBaseURL() {

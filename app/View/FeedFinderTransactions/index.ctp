@@ -11,9 +11,8 @@
 
 </div>
 
-<div id="geo_div" style="width:50%; height:500px;">
+<div id="map-canvas" style="width:50%; height:500px;"></div>
 
-</div>
 
 <div id="pie_div" style="width:50%; height:300px;">
 
@@ -33,6 +32,7 @@
   echo $this->Form->input('actions', array('type' => 'select','label'=>'actions','id'=>'actions',
   'options'=>$actions,'default'=>2));
 
+  echo $this->Form->input('Location', array('type' => 'text','label'=>'location','id'=>'location'));
 
 
   echo $this->Form->end('go');
