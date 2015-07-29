@@ -23,8 +23,11 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 	<?php echo $this->Html->charset();
     ?>
 		<?php
-		$this->Html->script('https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization,places', false);
-		$this->Html->script('http://www.google.com/jsapi', false);
+		// $this->Html->script('https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization,places,geometry', false);
+		//$this->Html->script('http://www.google.com/jsapi', false);
+		$this->Html->script('http://d3js.org/topojson.v1.min.js', false);
+
+
 
           echo $this->fetch('meta');
           echo $this->fetch('css');

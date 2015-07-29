@@ -9,9 +9,6 @@ $(document).ready(function() {
 
 	$('#from_datepicker').datepicker('setDate', new Date(2012, 0, 01));
 
-
-
-  getBasicCount();
   plotGraph('actions','line','graph_div');
 
   $('#timespan,  #actions').on('change',function(){
@@ -22,21 +19,7 @@ $(document).ready(function() {
 
 
 });
-function getBasicCount(){
-  $.ajax({
-    type:'GET',
-    dataType:'json',
-    url: getBaseURL() + '/feed_finder_transactions/' +'basic_data_counts',
-    success: function(data){
-      console.log(data);
-      $('#basic_counts').append(JSON.stringify(data));
-    },
-    error: function(xhs,textStatus,error){
-      console.log(textStatus);
-    }
 
-  });
-}
 
 function plotGraph(url, graph_type, render_div){
   form_data = $('#query_form').serialize();

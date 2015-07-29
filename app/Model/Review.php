@@ -9,14 +9,11 @@ App::uses('Model', 'Model');
  *
  * @package       app.Model
  */
-class FeedFinderTransaction extends Model {
+class Review extends Model {
 
-  public $belongsTo = array(
-         'Venue' => array(
-             'type' => 'INNER'
-         ),
+  public $belongsTo = array(¢
          'User'=>array('type'=>'INNER')
      );
-   }
+}
 
 ?>

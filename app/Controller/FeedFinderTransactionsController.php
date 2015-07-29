@@ -18,7 +18,7 @@ class FeedFinderTransactionsController extends AppController
     // public $layout = 'Highcharts.chart.demo';
 
     private $timespan_options = array('Life time','Today','Yesterday','This week','Last week','This month',
-                          'Last month','3 month','6 month','custom', );
+                          'Last month','3 month','6 month','custom');
 
     public $actions = array('add existing venue',
     'add new venue',
@@ -27,74 +27,92 @@ class FeedFinderTransactionsController extends AppController
     'survey',
     'survey get',
     'venues',
-    'venue get' );
+    'venue get', );
 
     public function index()
     {
         $this->set('timespan_options', $this->timespan_options);
         $this->set('actions', $this->actions);
-        $result = $this->FeedFinderTransaction->find('all',array('conditions'=>array("FeedFinderTransaction.venue_id
-         IN (SELECT `id` FROM `venues` WHERE `country` = 'United Kingdom') ")));
-        //$this->_print_array($result);
-        // $json = file_get_contents('http://code.highcharts.com/mapdata/countries/gb/gb-all.geo.json');
-        // $obj = json_decode($json,true);
-        // $this->_print_array($obj['features']);
+        $this->FeedFinderTransaction->recursive = 1;
     }
 
     public function actions()
     {
-      $this->autoRender = false;
-      if($this->request->is('ajax'))
-      { //access the values by index
-        $selected_action =  $this->request->query('actions');
-        $selected_timespan =  $this->request->query('timespan');
-        $conditions = $this->_timespan_condition_switch($selected_action,$selected_timespan);
-        $result = $this->FeedFinderTransaction->find('all',
-        array('fields'=>array('FeedFinderTransaction.created'),
-              'order'=>'FeedFinderTransaction.created',
-              'conditions'=>$conditions));
-        echo json_encode($this->_calc_graph_data($result));
-      }
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) { //access the values by index
+        $selected_action = $this->request->query('actions');
+            $selected_timespan = $this->request->query('timespan');
+            $conditions = $this->_timespan_condition_switch($selected_action, $selected_timespan);
+            $result = $this->FeedFinderTransaction->find('all',
+        array('fields' => array('FeedFinderTransaction.created'),
+              'order' => 'FeedFinderTransaction.created',
+              'conditions' => $conditions));
+            echo json_encode($this->_calc_graph_data($result));
+        }
     }
 
-    public function basic_data_counts(){
-      $this->autoRender = false;
-      if($this->request->is('ajax')){
-      $counts = array();
-      $counts['review'] =$this->FeedFinderTransaction->find('count',array('conditions'=>array(
-                                                         'FeedFinderTransaction.action'=>'review')));
 
-      $counts['register']=$this->FeedFinderTransaction->find('count',array('conditions'=>array(
-                                                        'FeedFinderTransaction.action'=>'register')));
-      $counts['venues'] = $this->Venue->find('count');
+    public function bounding_box()
+    {
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) {
+              $north_lat = $this->request->data('north_lat');
+              $south_lat = $this->request->data('south_lat');
+              $east_lng = $this->request->data('east_lng');
+              $west_lng = $this->request->data('west_lng');
 
-      $counts['users']=$this->UserLookupTable->find('count');
+              $this->FeedFinderTransaction->recursive = 1;
 
-        echo json_encode($counts);
-      }
+              $query_result = $this->FeedFinderTransaction->find('all',array(
+                'fields'=>array('Venue.city','FeedFinderTransaction.lat','FeedFinderTransaction.lng','COUNT(Venue.city) AS mycount'),
+                'order'=>array('mycount DESC'),
+                'group' =>array('Venue.city'),
+                'conditions'=>array('FeedFinderTransaction.action'=>'review',
+                                    'FeedFinderTransaction.lat >=' =>$south_lat,
+                                    'FeedFinderTransaction.lat <=' =>$north_lat,
+                                    'FeedFinderTransaction.lng >=' =>$west_lng,
+                                    'FeedFinderTransaction.lng <=' =>$east_lng)
+              ));
+              echo json_encode($query_result);
+        }
     }
 
-    public function fetchRelevantData(){
+    public function fetch_location_radius()
+    {
       $this->autoRender =false;
 
       if($this->request->is('ajax')){
-        $lat = $this->request->data('lat');
-        $lon =  $this->request->data('lng');
-        $rad =5; $R = 6371;
-        //src http://www.movable-type.co.uk/scripts/latlong-db.html
-        $maxLat = $lat + rad2deg($rad/$R);
-        $minLat = $lat - rad2deg($rad/$R);
+          $lat = $this->request->data('lat');
+          $lon =  $this->request->data('lng');
+          $rad =5; $R = 6371;
+          //src http://www.movable-type.co.uk/scripts/latlong-db.html
+          $maxLat = $lat + rad2deg($rad/$R);
+          $minLat = $lat - rad2deg($rad/$R);
+          $maxLon = $lon + rad2deg($rad/$R/cos(deg2rad($lat)));
+          $minLon = $lon - rad2deg($rad/$R/cos(deg2rad($lat)));
 
-        $maxLon = $lon + rad2deg($rad/$R/cos(deg2rad($lat)));
-        $minLon = $lon - rad2deg($rad/$R/cos(deg2rad($lat)));
-
-        $query_result = $this->FeedFinderTransaction->find('all',array(
+          $query_result = $this->FeedFinderTransaction->find('all',array(
           'fields'=>array('FeedFinderTransaction.lat','FeedFinderTransaction.lng'),
           'conditions'=>array("FeedFinderTransaction.lat BETWEEN $minLat AND $maxLat",
-                             "FeedFinderTransaction.lng BETWEEN $minLon AND $maxLon")));
-          // $arrayName = array('lat' => $lat,'lng'=>$lng );
-         echo json_encode($query_result);
-      }
+          "FeedFinderTransaction.lng BETWEEN $minLon AND $maxLon")));
+            echo json_encode($query_result);
+       }
+
+    }
+
+    public function world_reviews(){
+      $this->autoRender =false;
+
+      if($this->request->is('ajax')){
+        $this->FeedFinderTransaction->recursive = 1;
+
+        $query_result = $this->FeedFinderTransaction->find('all',array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
+                                                                       'group'=>array('Venue.country'),
+                                                                       'conditions'=> array('FeedFinderTransaction.action'=>'review'),
+                                                                       'order'=>array('mycount DESC')));
+           echo json_encode($query_result);
+       }
+
     }
 
 
@@ -128,8 +146,6 @@ class FeedFinderTransactionsController extends AppController
 
         return $result_array;
     }
-
-
 
     public function _timespan_condition_switch($selected_action, $selected_timespan)
     {
@@ -178,7 +194,7 @@ class FeedFinderTransactionsController extends AppController
 
         case 8: // 6 months
               return array('FeedFinderTransaction.action' => $this->actions[$selected_action],
-                           'FeedFinderTransaction.created >= NOW() - INTERVAL 6 month' );
+                           'FeedFinderTransaction.created >= NOW() - INTERVAL 6 month');
         break;
 
         case 9://custom date
