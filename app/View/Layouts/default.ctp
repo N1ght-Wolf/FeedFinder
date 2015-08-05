@@ -25,18 +25,13 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 		<?php
 		// $this->Html->script('https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization,places,geometry', false);
 		//$this->Html->script('http://www.google.com/jsapi', false);
-		$this->Html->script('http://d3js.org/topojson.v1.min.js', false);
-
-
-
+		$this->Html->script('https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.js', false);
           echo $this->fetch('meta');
           echo $this->fetch('css');
           echo $this->fetch('script');
   				echo $this->Html->meta('icon');
   				echo $this->Html->css('cake.generic');
-
         ?>
-
 	<title>
 		<?php echo $cakeDescription ?>:
 		<?php echo $this->fetch('title'); ?>

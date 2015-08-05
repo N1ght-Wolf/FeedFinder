@@ -2,6 +2,7 @@
 
 App::uses('AppController', 'Controller');
 App::uses('CakeTime', 'Utility');
+App::import('vendor', 'geoPHP/geoPHP.inc');
 
 /**
  * Static content controller.
@@ -14,7 +15,7 @@ class FeedFinderTransactionsController extends AppController
 {
     public $components = array('Session','RequestHandler');
     public $helpers = array('Session', 'Html', 'Form','Js' => array('jquery'));
-    public $uses = array('Venue','FeedFinderTransaction','UserLookupTable');
+    public $uses = array('Venue','FeedFinderTransaction','UserLookupTable', 'World');
     // public $layout = 'Highcharts.chart.demo';
 
     private $timespan_options = array('Life time','Today','Yesterday','This week','Last week','This month',
@@ -34,6 +35,23 @@ class FeedFinderTransactionsController extends AppController
         $this->set('timespan_options', $this->timespan_options);
         $this->set('actions', $this->actions);
         $this->FeedFinderTransaction->recursive = 1;
+
+//         $query_result = $this->FeedFinderTransaction->find('all',
+//         array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
+//                              'group'=>array('Venue.country'),
+//                              'conditions'=> array('FeedFinderTransaction.action'=>'review'),
+//                              'order'=>array('mycount DESC')));
+//
+//        foreach ($query_result as $result => $value) {
+//          $lat = $value['Venue']['lat'];
+//          $lng = $value['Venue']['lng'];
+//          $mycount = $value[0]['mycount'];
+//          $ans = $this->World->find('first', array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
+//          $this->World->id = $ans['World']['id'];
+//          $this->World->saveField('review', $mycount);
+//
+// $this->_print_array($ans);
+//        }
     }
 
     public function actions()
@@ -60,11 +78,12 @@ class FeedFinderTransactionsController extends AppController
               $south_lat = $this->request->data('south_lat');
               $east_lng = $this->request->data('east_lng');
               $west_lng = $this->request->data('west_lng');
+              $geo_json = $this->request->data('geo_json');
 
               $this->FeedFinderTransaction->recursive = 1;
 
               $query_result = $this->FeedFinderTransaction->find('all',array(
-                'fields'=>array('Venue.city','FeedFinderTransaction.lat','FeedFinderTransaction.lng','COUNT(Venue.city) AS mycount'),
+                'fields'=>array('Venue.city','Venue.lat','Venue.lng','COUNT(Venue.city) AS mycount'),
                 'order'=>array('mycount DESC'),
                 'group' =>array('Venue.city'),
                 'conditions'=>array('FeedFinderTransaction.action'=>'review',
@@ -73,6 +92,8 @@ class FeedFinderTransactionsController extends AppController
                                     'FeedFinderTransaction.lng >=' =>$west_lng,
                                     'FeedFinderTransaction.lng <=' =>$east_lng)
               ));
+
+
               echo json_encode($query_result);
         }
     }
@@ -105,11 +126,48 @@ class FeedFinderTransactionsController extends AppController
 
       if($this->request->is('ajax')){
         $this->FeedFinderTransaction->recursive = 1;
+        $query_result = $this->FeedFinderTransaction->find('all',
+        array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
+                             'group'=>array('Venue.country'),
+                             'conditions'=> array('FeedFinderTransaction.action'=>'review'),
+                             'order'=>array('mycount DESC')));
 
-        $query_result = $this->FeedFinderTransaction->find('all',array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
-                                                                       'group'=>array('Venue.country'),
-                                                                       'conditions'=> array('FeedFinderTransaction.action'=>'review'),
-                                                                       'order'=>array('mycount DESC')));
+       foreach ($query_result as $result => $value) {
+         $lat = $value['Venue']['lat'];
+         $lng = $value['Venue']['lng'];
+         $mycount = $value[0]['mycount'];
+         $ans = $this->World->find('first', array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
+         $this->World->id = $ans['World']['id'];
+         $this->World->saveField('review', $mycount);
+
+        //  $this->_print_array($ans);
+       }
+           echo json_encode($query_result);
+       }
+
+    }
+
+    public function country_reviews(){
+      $this->autoRender =false;
+
+      if($this->request->is('ajax')){
+        $this->FeedFinderTransaction->recursive = 1;
+        $query_result = $this->FeedFinderTransaction->find('all',
+        array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
+                             'group'=>array('Venue.country'),
+                             'conditions'=> array('FeedFinderTransaction.action'=>'review'),
+                             'order'=>array('mycount DESC')));
+
+       foreach ($query_result as $result => $value) {
+         $lat = $value['Venue']['lat'];
+         $lng = $value['Venue']['lng'];
+         $mycount = $value[0]['mycount'];
+         $ans = $this->World->find('first', array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
+         $this->World->id = $ans['World']['id'];
+         $this->World->saveField('review', $mycount);
+
+        //  $this->_print_array($ans);
+       }
            echo json_encode($query_result);
        }
 

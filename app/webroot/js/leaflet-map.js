@@ -1,212 +1,222 @@
-var map, geoLayerW, geoLayerC;
-var countryFeatureIndex = {};
-var addedToGeoLayerC = [];
-var simpCounter = 0;
+var map;
+var geoserverUrl = 'http://localhost:8080/geoserver/cite/ows';
+var worldLayer, worldGeoJson;
+var worldIndex = {};
+var countryLayer, countryGeoJson;
+var countryIndex = {};
+var layerFromGeoserver, callbackMethod;
+var mapToken= 'pk.eyJ1IjoiZmVlZC1maW5kZXIiLCJhIjoiMDIyMGI4ZmU4ZmFlYTMxMDFlMjYyZmJmNzQ5OWJhOGEifQ.6cOhRAs3U0blI_n-cJxD0g';
+
 $(document).ready(function() {
-
-	fetchWorldReviews('world_reviews');
-	initWorldJson();
-
-	map = L.map('map').setView([51.505, -0.09], 3);
-	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(map);
-
-	geoLayerW = L.geoJson(world, {
-		onEachFeature: onEachFeatureW,
-		style: style,
-		filter: function(feature, layer) {
-			return feature.properties.show_on_map;
-		}
-	}).addTo(map);
-
-	geoLayerC = L.geoJson(gbr, {
-		onEachFeature: onEachFeatureC,
-		style: style
-	});
-
-	map.on('zoomend', function(e) {
-		if (map.getZoom() <= 1) {
-			geoLayerC.clearLayers();
-			map.removeLayer(geoLayerC);
-			setAllShowOnMap(world, true);
-			map.removeLayer(geoLayerW);
-			console.log(world);
-			geoLayerW.addTo(map);
-		}
-		console.log(map.getZoom());
-	});
+	//first layer for map is world
+	layerFromGeoserver = 'cite:worlds';
+	callbackMethod = 'callbackWorld'
+	//update the data is PostgreSQL for world country
+	readyWorldReview();
+	//instantiate a new mapbox
+	L.mapbox.accessToken = mapToken;
+	map = L.mapbox.map('map', 'mapbox.streets')
+	  .setView([37.8, -96], 2);
 
 });
 
-function zoomToFeature(e) {
-	map.fitBounds(e.target.getBounds());
-  console.log(e.target.getBounds());
-}
-
-function zoomChangeLayer(e) {
-	console.log(e);
-	var result = leafletPip.pointInLayer([e.latlng.lng, e.latlng.lat], geoLayerW);
-	var countryId;
-	console.log(result);
-	if (result.length > 0 && addedToGeoLayerC.indexOf(result[0].feature.id) < 0) {
-		countryId = result[0].feature.id;
-		result[0].feature.properties.show_on_map = false;
-		geoLayerW.clearLayers();
-		geoLayerW.addData(world);
-
-		$.getScript("../js/" + countryId + ".js", function() {
-			geoLayerC.addData(eval(countryId.toLowerCase())).addTo(map);
-			addedToGeoLayerC.push(countryId); //remember what has been added to geoLayerC
-		});
-    var bounds = e.target.getBounds();
-    fetchCountryReviews(bounds);
-    console.log(bounds);
-	}
-
-function zoomOutChangeLayer(e){
-
-}
-
-	map.fitBounds(e.target.getBounds());
-}
-
-function filter() {
-
-}
-
+//functions
 function getColor(d) {
-
-	return d > 1000 ? '#800026' :
-		d > 500 ? '#BD0026' :
-		d > 40 ? '#E31A1C' :
-		d > 30 ? '#FC4E2A' :
-		d > 10 ? '#FD8D3C' :
-		d > 5 ? '#FEB24C' :
-		d > 2 ? '#FED976' :
-		'GREEN';
+    return d > 500 ? '#800026' :
+           d > 250  ? '#BD0026' :
+           d > 100  ? '#E31A1C' :
+           d > 50  ? '#FC4E2A' :
+           d > 20   ? '#FD8D3C' :
+           d > 10   ? '#FEB24C' :
+           d > 5   ? '#FED976' :
+                      'GREEN';
 }
 
 function style(feature) {
-	return {
-		fillColor: getColor(feature.properties.reviewCount),
-		weight: 1,
-		opacity: 1,
-		color: 'white',
-		dashArray: '2',
-		fillOpacity: 0.5
-	};
-}
-
-function onEachFeatureW(feature, layer) {
-	layer.on({
-		mouseover: highlightFeature,
-		mouseout: resetHighlight,
-		click: zoomToFeature,
-		dblclick: zoomChangeLayer
-	});
-}
-
-function onEachFeatureC(feature, layer) {
-	layer.on({
-		mouseover: highlightFeature,
-		mouseout: resetHighlight,
-
-	});
+    return {
+        fillColor: getColor(feature.properties.review),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
 }
 
 function highlightFeature(e) {
-	//hover style
-	var layer = e.target;
+    var layer = e.target;
 
-	layer.setStyle({
-		weight: 5,
-		color: '#666',
-		dashArray: '',
-		fillOpacity: 0.7
-	});
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
 
-	if (!L.Browser.ie && !L.Browser.opera) {
-		layer.bringToFront();
-	}
+    if(!L.Browser.ie && !L.Browser.opera){
+        layer.bringToFront();
+    }
 }
 
 function resetHighlight(e) {
-	//mouse out style
-	geoLayerW.resetStyle(e.target);
-	// geoLayerC.resetStyle(e.target);
+    worldLayer.resetStyle(e.target);
+}
+function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds());
+		//find the country iso
+		var iso3 = e.target.feature.properties.iso3;
+		//get its index
+		index = worldIndex[iso3];
+		//change its visibility property
+		worldGeoJson.features[index].properties.show = false;
+		//clear and update the layer
+		worldLayer.clearLayers();
+		worldLayer.addData(worldGeoJson);
+		getCountryGeojson();
+}
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        dblclick: zoomToFeature,
+    });
+}
+
+function filter(feature, layer) {
+		 return feature.properties.show;
+ }
+
+function callbackWorld(mapData) {
+	setWorldLayer(mapData);
+}
+function setWorldLayer(data){
+	if(isEmpty(worldIndex)){
+		//make indexs for each country
+		indexData(data, worldIndex);
+	}
+	//keep copy of geoJson data
+	worldGeoJson = data;
+	//make a layer defining
+	//style, filter etc.
+	worldLayer = L.geoJson(data,{
+		style:style,
+		onEachFeature: onEachFeature,
+		filter:filter
+	}).addTo(map);
 
 }
 
-function fetchWorldReviews() {
-	$.ajax({
-		type: 'GET',
-		dataType: "json",
-		data: form_data,
-		url: getBaseURL() + '/feed_finder_transactions/' + 'world_reviews',
-		success: function(data) {
-			console.log(data);
-			var features = world.features;
-			var lat, lng, reviewCount, results, index;
-			//merge the database count value with the rightful features
-			//e.g. GBR = 1958
-			for (var i = 0; i < data.length; i++) {
-				lat = data[i].Venue.lat;
-				lng = data[i].Venue.lng;
-				reviewCount = data[i][0].mycount;
-				results = leafletPip.pointInLayer([lng, lat], geoLayerW);
-				if (results.length > 0) {
-					index = countryFeatureIndex[results[0].feature.id];
-					features[index].properties.reviewCount += parseInt(data[i][0].mycount);
-				}
-			}
-			console.log(world);
-			geoLayerW.setStyle(style);
+function indexData(data, indexObj){
+	//index the countrys by iso for easier future lookups
+	for( var i=0 ; i < data.totalFeatures; i++){
+			indexObj[data.features[i].properties.iso3] = i;
+	}
+}
+function getGeoserverGeojson(layer, callback){
+	//set the query for the url
+	var query = setGeoserverRequest(layer,
+		 															callback);
 
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			console.log(textStatus, errorThrown);
-		}
+	var parameters = L.Util.extend(query);
+	//make the request from geoserver
+	$.ajax(geoserverUrl+L.Util.getParamString(parameters),
+	{ dataType: 'jsonp' }
+	).done(function ( data ) {
 	});
 }
 
-function fetchCountryReviews(bounds){
-  $.ajax({
-    type: 'POST',
-    url: getBaseURL() + '/feed_finder_transactions/' + 'bounding_box',
-    dataType: 'json',
-    data: {north_lat:bounds._northEast.lat,
-           south_lat:bounds._southWest.lat,
-           east_lng:bounds._northEast.lng,
-           west_lng: bounds._southWest.lng},
-    success: function(data){
-      alert('success');
-      console.log(data);
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus, errorThrown);
+function getCountryGeojson(){
+	//se the layer and callback method to use
+	layerFromGeoserver = 'cite:gbrs';
+	callbackMethod='callbackCountry';
+	getGeoserverGeojson(layerFromGeoserver,
+											callbackMethod);
+
+}
+
+function callbackCountry(data){
+	console.log(data);
+	setCountryLayer(data);
+}
+function setCountryLayer(data){
+	if(isEmpty(countryIndex)){
+		//make indexs for each country
+		indexData(data,countryIndex);
+	}
+
+	//keep copy of geoJson data
+	// worldGeoJson = data;
+	//make a layer defining
+	//style, filter etc.
+	countryLayer = L.geoJson(data,{
+		style:style,
+		onEachFeature: onEachFeature,
+		filter:filter
+	}).addTo(map);
+	console.log(countryLayer);
+
+}
+
+function readyWorldReview(){
+	$.ajax({
+		url: getBaseURL() + '/feed_finder_transactions/' + 'world_reviews',
+	  success: function(data) {
+			console.log(data);
+			getGeoserverGeojson(layerFromGeoserver,
+													callbackMethod
+												);
+	  }
+	});
+}
+
+function setGeoserverRequest(typeName, callback){
+	var defaultParameters = {
+		service: 'WFS',
+		version: '1.0.0',
+		request: 'GetFeature',
+		typeName: typeName,
+		maxFeatures: 100000,
+		outputFormat: 'text/javascript',
+		format_options: 'callback:'+callback
+	};
+	return defaultParameters;
+}
+
+
+function getBaseURL() {
+	var url = location.href;
+	var baseURL = url.substring(0, url.indexOf('/', 14));
+
+	if (baseURL.indexOf('http://localhost') != -1) {
+		var url = location.href;
+		var pathname = location.pathname;
+		var index1 = url.indexOf(pathname);
+		var index2 = url.indexOf("/", index1 + 1);
+		var baseLocalUrl = url.substr(0, index2);
+
+		return baseLocalUrl + "/";
+	} else {
+		// Root Url for domain name
+		return baseURL + "/";
+	}
+}
+
+function isEmpty(obj) {
+
+    // null and undefined are "empty"
+    if (obj == null) return true;
+
+    // Assume if it has a length property with a non-zero value
+    // that that property is correct.
+    if (obj.length > 0)    return false;
+    if (obj.length === 0)  return true;
+
+    // Otherwise, does it have any properties of its own?
+    // Note that this doesn't handle
+    // toString and valueOf enumeration bugs in IE < 9
+    for (var key in obj) {
+        if (hasOwnProperty.call(obj, key)) return false;
     }
-  });
-}
 
-function initWorldJson() {
-	var features = world.features;
-	for (var i = 0; i < features.length; i++) {
-		countryId = features[i].id;
-		//also store their index for easier access
-		countryFeatureIndex[countryId] = i;
-		features[i].properties.reviewCount = 0;
-		features[i].properties.show_on_map = true;
-	}
-}
-
-function setAllShowOnMap(gjson, bool) {
-	var features = gjson.features;
-	for (var i = 0; i < features.length; i++) {
-		features[i].properties.show_on_map = bool;
-	}
-}
-
-function typeOf(obj) {
-	return {}.toString.call(obj).split(' ')[1].slice(0, -1).toLowerCase();
+    return true;
 }
