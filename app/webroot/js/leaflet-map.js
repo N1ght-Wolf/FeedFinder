@@ -1,35 +1,128 @@
-var map;
-var geoserverUrl = 'http://localhost:8080/geoserver/cite/ows';
-var worldLayer, worldGeoJson;
-var worldIndex = {};
-var countryLayer, countryGeoJson;
-var countryIndex = {};
-var layerFromGeoserver, callbackMethod;
+var map, world, adminOne;
+var colorRange;
+var simpCounter = 0;
+var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms';
 var mapToken= 'pk.eyJ1IjoiZmVlZC1maW5kZXIiLCJhIjoiMDIyMGI4ZmU4ZmFlYTMxMDFlMjYyZmJmNzQ5OWJhOGEifQ.6cOhRAs3U0blI_n-cJxD0g';
-
+var legend;
 $(document).ready(function() {
-	//first layer for map is world
-	layerFromGeoserver = 'cite:worlds';
-	callbackMethod = 'callbackWorld'
-	//update the data is PostgreSQL for world country
-	readyWorldReview();
-	//instantiate a new mapbox
+	legend = L.control({position: 'bottomright'});
+
+	getColorRangeWorld();
+	getColorRangeAdminOne();
+
 	L.mapbox.accessToken = mapToken;
 	map = L.mapbox.map('map', 'mapbox.streets')
 	  .setView([37.8, -96], 2);
 
+
+
+	map.on('zoomend', function(e) {
+	if (map.getZoom() >= 6 && map.getZoom() <= 10) {
+		if (simpCounter == 0 || simpCounter == 2) {
+			if(map.hasLayer(world)){
+					map.removeLayer(world);
+			}
+			adminOne.addTo(map);
+			simpCounter = 1;
+		}
+	} else if (map.getZoom() >= 11) {
+		if (simpCounter == 0 || simpCounter == 1) {
+		simpCounter = 2;
+		}
+	} else if (map.getZoom() <= 6) { //Return to original data
+		if (simpCounter == 1 || simpCounter == 2) {
+			if(map.hasLayer(adminOne)){
+				map.removeLayer(adminOne);
+			}
+			world.addTo(map);
+		simpCounter = 0;
+		}
+	}
+	});
+
+
+
 });
+
+function getColorRangeWorld(){
+
+	$.ajax
+	({
+		dataType: 'json',
+		type:'GET',
+		data:{model:'World'},
+		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
+		success: function(data) {
+			getWorldWmsTiles(data.first_q,
+									data.second_q,
+									data.third_q,
+									data.max);
+		}
+	});
+
+}
+function getColorRangeAdminOne(){
+
+	$.ajax
+	({
+		dataType: 'json',
+		type:'GET',
+		data:{model:'AdminOne'},
+		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
+		success: function(data) {
+			getAdminWmsTiles(data.first_q,
+									data.second_q,
+									data.third_q,
+									data.max);
+		}
+	});
+
+}
+
+function getWorldWmsTiles(first_q, second_q, third_q, max){
+	world = L.tileLayer.wms
+	(geoserverUrl+'?SERVICE=WMS&REQUEST=GetMap&env=first_q:'+first_q+';second_q:'+second_q+';third_q:'+third_q+';max:'+max+';&VERSION=1.1.0', {
+			layers: 'cite:worlds',
+			format: 'image/png',
+			transparent: true,
+			version: '1.1.0',
+			attribution: "myattribution"
+	});
+	world.addTo(map);
+	legend.onAdd = function (map) {
+var div = L.DomUtil.create('div', 'info legend');
+
+    div.innerHTML +=
+    '<img src="http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=cite:worlds" alt="legend" width="134" height="147">';
+		legend.addTo(map);
+
+};
+
+	}
+
+function getAdminWmsTiles(first_q, second_q, third_q, max){
+
+	adminOne = L.tileLayer.wms
+	(geoserverUrl+'?SERVICE=WMS&REQUEST=GetMap&env=first_q:'+first_q+';second_q:'+second_q+';third_q:'+third_q+';max:'+max+';&VERSION=1.1.0', {
+			layers: 'cite:admin_ones',
+			format: 'image/png',
+			transparent: true,
+			version: '1.1.0',
+			attribution: "myattribution"
+	});
+
+}
 
 //functions
 function getColor(d) {
     return d > 500 ? '#800026' :
-           d > 250  ? '#BD0026' :
-           d > 100  ? '#E31A1C' :
+           d > 250 ? '#BD0026' :
+           d > 100 ? '#E31A1C' :
            d > 50  ? '#FC4E2A' :
-           d > 20   ? '#FD8D3C' :
-           d > 10   ? '#FEB24C' :
-           d > 5   ? '#FED976' :
-                      'GREEN';
+           d > 20  ? '#FD8D3C' :
+           d > 10  ? '#FEB24C' :
+           d > 3   ? '#FED976' :
+                     'GREEN';
 }
 
 function style(feature) {
@@ -63,7 +156,6 @@ function resetHighlight(e) {
 }
 function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
-		//find the country iso
 		var iso3 = e.target.feature.properties.iso3;
 		//get its index
 		index = worldIndex[iso3];
@@ -72,13 +164,13 @@ function zoomToFeature(e) {
 		//clear and update the layer
 		worldLayer.clearLayers();
 		worldLayer.addData(worldGeoJson);
-		getCountryGeojson();
+		getCountryGeojson(iso3.toLowerCase()+'s');
 }
 function onEachFeature(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
         mouseout: resetHighlight,
-        dblclick: zoomToFeature,
+        // dblclick: zoomToFeature,
     });
 }
 
@@ -86,32 +178,52 @@ function filter(feature, layer) {
 		 return feature.properties.show;
  }
 
-function callbackWorld(mapData) {
-	setWorldLayer(mapData);
-}
-function setWorldLayer(data){
-	if(isEmpty(worldIndex)){
-		//make indexs for each country
-		indexData(data, worldIndex);
-	}
-	//keep copy of geoJson data
-	worldGeoJson = data;
-	//make a layer defining
-	//style, filter etc.
-	worldLayer = L.geoJson(data,{
-		style:style,
-		onEachFeature: onEachFeature,
-		filter:filter
-	}).addTo(map);
+
+
+function getCountryGeojson(iso){
+	//se the layer and callback method to use
+	layerFromGeoserver = 'cite:'+iso;
+	callbackMethod='callbackCountry';
+	getGeoserverGeojson(layerFromGeoserver,
+											callbackMethod);
 
 }
 
-function indexData(data, indexObj){
-	//index the countrys by iso for easier future lookups
-	for( var i=0 ; i < data.totalFeatures; i++){
-			indexObj[data.features[i].properties.iso3] = i;
-	}
+
+function readyWorldReview(){
+	$.ajax({
+		url: getBaseURL() + '/feed_finder_transactions/' + 'world_reviews',
+	  success: function(data) {
+			//console.log(data);
+			getGeoserverGeojson('cite:worlds',
+													'callbackWorld'
+												);
+	  }
+	});
 }
+
+function readyCountryReview(boundingBox, iso3){
+	var north_lat = boundingBox['_northEast']['lat'];
+	var north_lng = boundingBox['_northEast']['lng'];
+	var south_lat = boundingBox['_southWest']['lat'];
+	var south_lng = boundingBox['_southWest']['lng'];
+	console.log(iso3);
+	$.ajax({
+		type:'POST',
+		url: getBaseURL() + '/feed_finder_transactions/' + 'country_reviews',
+		data:{north_lng:north_lng, north_lat:north_lat,
+					south_lng:south_lng, south_lat:south_lat,
+					iso3:iso3
+				},
+		success: function(data) {
+			console.log(data);
+			getGeoserverGeojson('cite:'+iso3.toLowerCase()+'s',
+													'callbackCountry'
+												);
+		}
+	});
+}
+
 function getGeoserverGeojson(layer, callback){
 	//set the query for the url
 	var query = setGeoserverRequest(layer,
@@ -122,50 +234,6 @@ function getGeoserverGeojson(layer, callback){
 	$.ajax(geoserverUrl+L.Util.getParamString(parameters),
 	{ dataType: 'jsonp' }
 	).done(function ( data ) {
-	});
-}
-
-function getCountryGeojson(){
-	//se the layer and callback method to use
-	layerFromGeoserver = 'cite:gbrs';
-	callbackMethod='callbackCountry';
-	getGeoserverGeojson(layerFromGeoserver,
-											callbackMethod);
-
-}
-
-function callbackCountry(data){
-	console.log(data);
-	setCountryLayer(data);
-}
-function setCountryLayer(data){
-	if(isEmpty(countryIndex)){
-		//make indexs for each country
-		indexData(data,countryIndex);
-	}
-
-	//keep copy of geoJson data
-	// worldGeoJson = data;
-	//make a layer defining
-	//style, filter etc.
-	countryLayer = L.geoJson(data,{
-		style:style,
-		onEachFeature: onEachFeature,
-		filter:filter
-	}).addTo(map);
-	console.log(countryLayer);
-
-}
-
-function readyWorldReview(){
-	$.ajax({
-		url: getBaseURL() + '/feed_finder_transactions/' + 'world_reviews',
-	  success: function(data) {
-			console.log(data);
-			getGeoserverGeojson(layerFromGeoserver,
-													callbackMethod
-												);
-	  }
 	});
 }
 
@@ -180,6 +248,69 @@ function setGeoserverRequest(typeName, callback){
 		format_options: 'callback:'+callback
 	};
 	return defaultParameters;
+}
+
+function callbackWorld(mapData) {
+	setWorldLayer(mapData);
+}
+
+
+function callbackCountry(data){
+	//console.log(data);
+	countryLayer.addData(data);
+}
+
+
+function setWorldLayer(data){
+	if(isEmpty(worldIndex)){
+		//make indexs for each country
+		indexDataWorld(data, worldIndex);
+	}
+	//keep copy of geoJson data
+	worldGeoJson = data;
+	//make a layer defining
+	//style, filter etc.
+	worldLayer = L.geoJson(data,{
+		style:style,
+		onEachFeature: onEachFeature,
+		filter:filter
+	}).addTo(map);
+
+}
+
+function setCountryLayer(data){
+	if(isEmpty(countryIndex)){
+		//make indexs for each country
+		indexDataCountry(data,countryIndex);
+	}
+	console.log(countryIndex);
+
+	//keep copy of geoJson data
+	// worldGeoJson = data;
+	//make a layer defining
+	//style, filter etc.
+	countryLayer = L.geoJson(data,{
+		style:style,
+		onEachFeature: onEachFeature,
+		filter:filter
+	}).addTo(map);
+	console.log(countryLayer);
+
+}
+
+
+function indexDataWorld(data, indexObj){
+	//index the countrys by iso for easier future lookups
+	for( var i=0 ; i < data.totalFeatures; i++){
+			indexObj[data.features[i].properties.iso3] = i;
+	}
+}
+
+function indexDataCountry(data, indexObj){
+	//index the countrys by iso for easier future lookups
+	for( var i=0 ; i < data.totalFeatures; i++){
+			indexObj[data.features[i].properties.name_2] = i;
+	}
 }
 
 

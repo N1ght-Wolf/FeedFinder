@@ -1,6 +1,7 @@
 <?php echo $this->Html->script('jquery'); ?>
 <?php echo $this->Html->script('jquery-ui'); ?>
 <?php echo $this->Html->script('graph'); ?>
+<?php echo $this->Html->script('iso.js'); ?>
 <?php echo $this->Html->script('leaflet-map'); ?>
 <?php echo $this->Html->css('jquery-ui'); ?>
 <?php echo $this->Html->css('feedfinder'); ?>

@@ -4,6 +4,7 @@ App::uses('AppController', 'Controller');
 App::uses('CakeTime', 'Utility');
 App::import('vendor', 'geoPHP/geoPHP.inc');
 
+
 /**
  * Static content controller.
  *
@@ -15,7 +16,7 @@ class FeedFinderTransactionsController extends AppController
 {
     public $components = array('Session','RequestHandler');
     public $helpers = array('Session', 'Html', 'Form','Js' => array('jquery'));
-    public $uses = array('Venue','FeedFinderTransaction','UserLookupTable', 'World');
+    public $uses = array('Venue','FeedFinderTransaction','UserLookupTable', 'World','AdminOne');
     // public $layout = 'Highcharts.chart.demo';
 
     private $timespan_options = array('Life time','Today','Yesterday','This week','Last week','This month',
@@ -28,31 +29,70 @@ class FeedFinderTransactionsController extends AppController
     'survey',
     'survey get',
     'venues',
-    'venue get', );
+    'venue get');
+    public $dynamic;
+
 
     public function index()
     {
+      ini_set('memory_limit', '2048M');
+      ini_set('max_execution_time', 300);
         $this->set('timespan_options', $this->timespan_options);
         $this->set('actions', $this->actions);
-        $this->FeedFinderTransaction->recursive = 1;
+        // $result = $this->FeedFinderTransaction->find('all',array(
+        //   'fields'=>array('Venue.city','Venue.lat','Venue.lng','COUNT(Venue.city) AS mycount'),
+        //   'group' =>array('Venue.city'),
+        //   'conditions'=>array('FeedFinderTransaction.action'=>'review')
+        // ));
+        //
+        //
+        //         //$this->_print_array($query);
+        //         foreach ($result as $key => $value) {
+        //           $lat = $value['Venue']['lat'];
+        //           $lng = $value['Venue']['lng'];
+        //           $count = $value['0']['mycount'];
+        //
+        //           $ans = $this->AdminOne->find('first',
+        //            array('conditions' => array("st_contains(AdminOne.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
+        //           $this->AdminOne->id = $ans['AdminOne']['id'];
+        //           $this->AdminOne->saveField('review', $this->AdminOne->field('review')+$count);
+        //         }
+        //
+        //
 
-//         $query_result = $this->FeedFinderTransaction->find('all',
-//         array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
-//                              'group'=>array('Venue.country'),
-//                              'conditions'=> array('FeedFinderTransaction.action'=>'review'),
-//                              'order'=>array('mycount DESC')));
-//
-//        foreach ($query_result as $result => $value) {
-//          $lat = $value['Venue']['lat'];
-//          $lng = $value['Venue']['lng'];
-//          $mycount = $value[0]['mycount'];
-//          $ans = $this->World->find('first', array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-//          $this->World->id = $ans['World']['id'];
-//          $this->World->saveField('review', $mycount);
-//
-// $this->_print_array($ans);
-//        }
+
+
     }
+
+      public function world_review_range(){
+        $this->autoRender =false;
+
+        if ($this->request->is('ajax')){
+          $model_name = $this->request->query['model'];
+          $variable='model_name';
+          $max = $this->$$variable->find('all',array('order'=>array("$model_name.review ASC"),
+                                                'fields'=>array("$model_name.review"),
+                                                'conditions' => array("$model_name.review > 0")));
+
+          $vals = array();
+          foreach ($max as $key => $value) {
+            $vals[] = $value[$model_name]['review'];
+          }
+          $count = count($max);
+          $first = round( .25 * ( $count + 1 ) ) - 1;
+          $second = round($count/2);
+          $third = round( .75 * ( $count + 1 ) ) - 1;
+
+          $quartiles = array('first_q'=> floatval($vals[$first]),
+                             'second_q'=> floatval($vals[$second]),
+                             'third_q'=> floatval($vals[$third]),
+                             'max' => $vals[$count-1]);
+          echo json_encode($quartiles);
+
+        }
+
+      }
+
 
     public function actions()
     {
@@ -121,55 +161,51 @@ class FeedFinderTransactionsController extends AppController
 
     }
 
-    public function world_reviews(){
-      $this->autoRender =false;
-
-      if($this->request->is('ajax')){
-        $this->FeedFinderTransaction->recursive = 1;
-        $query_result = $this->FeedFinderTransaction->find('all',
-        array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
-                             'group'=>array('Venue.country'),
-                             'conditions'=> array('FeedFinderTransaction.action'=>'review'),
-                             'order'=>array('mycount DESC')));
-
-       foreach ($query_result as $result => $value) {
-         $lat = $value['Venue']['lat'];
-         $lng = $value['Venue']['lng'];
-         $mycount = $value[0]['mycount'];
-         $ans = $this->World->find('first', array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-         $this->World->id = $ans['World']['id'];
-         $this->World->saveField('review', $mycount);
-
-        //  $this->_print_array($ans);
-       }
-           echo json_encode($query_result);
-       }
-
-    }
 
     public function country_reviews(){
       $this->autoRender =false;
-
       if($this->request->is('ajax')){
+        $north_lat = $this->request->data('north_lat');
+        $south_lat = $this->request->data('south_lat');
+        $north_lng = $this->request->data('north_lng');
+        $south_lng = $this->request->data('south_lng');
+        $table = $this->request->data('iso3');
+
+
         $this->FeedFinderTransaction->recursive = 1;
-        $query_result = $this->FeedFinderTransaction->find('all',
-        array('fields'=>array('COUNT(Venue.country) AS mycount','Venue.lat','Venue.lng','Venue.country'),
-                             'group'=>array('Venue.country'),
-                             'conditions'=> array('FeedFinderTransaction.action'=>'review'),
-                             'order'=>array('mycount DESC')));
 
-       foreach ($query_result as $result => $value) {
-         $lat = $value['Venue']['lat'];
-         $lng = $value['Venue']['lng'];
-         $mycount = $value[0]['mycount'];
-         $ans = $this->World->find('first', array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-         $this->World->id = $ans['World']['id'];
-         $this->World->saveField('review', $mycount);
+        $query_result = $this->FeedFinderTransaction->find('all',array(
+          'fields'=>array('Venue.city','Venue.lat','Venue.lng','COUNT(Venue.city) AS mycount'),
+          'order'=>array('mycount DESC'),
+          'group' =>array('Venue.city'),
+          'conditions'=>array('FeedFinderTransaction.action'=>'review',
+                              'FeedFinderTransaction.lat >=' =>$south_lat,
+                              'FeedFinderTransaction.lat <=' =>$north_lat,
+                              'FeedFinderTransaction.lng >=' =>$south_lng,
+                              'FeedFinderTransaction.lng <=' =>$north_lng)
+        ));
 
-        //  $this->_print_array($ans);
-       }
+
+        $tablename = strtolower($table);
+        $upperISOFirst = ucfirst($tablename);
+        $table_model = "upperISOFirst";
+        $dynamic = new Model(array('table' => $tablename.'s', 'name' => $upperISOFirst, 'ds' => 'postgresql'));
+        // $query_result = $this->$$table_model->find('all');
+        $this->$$table_model->updateAll(array($$table_model.'.review' => 0));
+        $ans;
+        foreach ($query_result as $result => $value) {
+          $lat = $value['Venue']['lat'];
+          $lng = $value['Venue']['lng'];
+          $mycount = $value[0]['mycount'];
+        $ans = $this->$$table_model->find('first',
+         array('conditions' => array("st_contains(".$$table_model.".geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
+        $this->$$table_model->id = $ans[$$table_model.'']['id'];
+        $this->$$table_model->saveField('review', $this->$$table_model->field('review')+$mycount);
+        //  //  $this->_print_array($ans);
+        }
            echo json_encode($query_result);
        }
+       echo $$tabl;
 
     }
 

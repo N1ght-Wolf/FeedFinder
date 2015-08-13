@@ -9,9 +9,8 @@ App::uses('Model', 'Model');
  *
  * @package       app.Model
  */
-class Venue extends Model {
-
-  // public $belongsTo = array('FeedFinderTransaction');
+class AdminOne extends Model {
+  public $useDbConfig = 'postgresql';
 
 }
 
