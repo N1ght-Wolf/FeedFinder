@@ -1,7 +1,6 @@
 <?php echo $this->Html->script('jquery'); ?>
 <?php echo $this->Html->script('jquery-ui'); ?>
 <?php echo $this->Html->script('graph'); ?>
-<?php echo $this->Html->script('iso.js'); ?>
 <?php echo $this->Html->script('leaflet-map'); ?>
 <?php echo $this->Html->css('jquery-ui'); ?>
 <?php echo $this->Html->css('feedfinder'); ?>
@@ -14,7 +13,7 @@
 </div>
 
 
-<div id="map" style="width:40%; height:560px;">
+<div id="map" style="width:40%; height:600px;">
 
 </div>
 
