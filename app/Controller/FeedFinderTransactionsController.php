@@ -100,6 +100,47 @@ class FeedFinderTransactionsController extends AppController
         }
 
         echo json_encode($final_array);
+
+
+      }
+    }
+
+    public function update_postgre_world(){
+      $this->autoRender = false;
+
+      if($this->request->is('ajax')){
+        $from = $this->request->query['from-date'];
+        $to = $this->request->query['to-date'];
+        $action = $this->request->query['action'];
+
+        $conditions = array('FeedFinderTransaction.created >=' => $from,
+                            'FeedFinderTransaction.created <=' => $to,
+                            'FeedFinderTransaction.action'=> strtolower($action));
+
+        $fields = array('Venue.lat','Venue.lng','COUNT(Venue.iso) AS mycount');
+        $group  = array('Venue.iso');
+
+        $results = $this->FeedFinderTransaction->find('all',array(
+        'conditions'=>$conditions,
+        'fields'=>$fields,
+        'group'=>$group));
+
+        $this->World->updateAll(
+        array('World.review'=>0)
+        );
+
+        foreach ($results as $result => $value) {
+          $lat = $value['Venue']['lat'];
+          $lng = $value['Venue']['lng'];
+          $count = $value['0']['mycount'];
+
+          $ans = $this->World->find('first',
+           array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
+          $this->World->id = $ans['World']['id'];
+          $this->World->saveField('review', $this->World->field('review')+$count);
+        }
+        $this->_print_array($results);
+
       }
     }
 
@@ -152,36 +193,6 @@ class FeedFinderTransactionsController extends AppController
 
 
 
-    public function _calc_graph_data($query_result)
-    {
-        $index_date = new DateTime();
-        $index_date->format('Y-m-d');
-        $array_months = array();
-        $action_count = array();
-        $counter = 0;
-
-        foreach ($query_result as $result) {
-            $index_date->modify($result['FeedFinderTransaction']['created']);
-        // if the month of the year is not in the array, add it
-        if (!in_array($index_date->format('M y'), $array_months)) {
-            $array_months[] = $index_date->format('M y');
-            $counter = 0;
-            ++$counter;
-            $action_count[] = $counter;
-        } else {
-            ++$counter;
-            $index = count($action_count) - 1;
-            if ($index >= 0) {
-                $action_count[$index] = $counter;
-            }
-        }
-        }
-        $result_array = array();
-        $result_array['month'] = $array_months;
-        $result_array['counts'] = $action_count;
-
-        return $result_array;
-    }
 
     public function _timespan_condition_switch($selected_action, $selected_timespan)
     {

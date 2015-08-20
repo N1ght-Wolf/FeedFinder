@@ -14,6 +14,7 @@ $(document).ready(function() {
     console.log(form);
 		formData = $(form).serialize();
 		//make an ajax get REQUEST
+    updatePostGreSQL(formData);
 
 		$.ajax({
 			type: 'GET',
@@ -27,7 +28,7 @@ $(document).ready(function() {
       console.log(textStatus, errorThrown);
       }
 
-		})
+		});
 	});
 
 
@@ -55,12 +56,22 @@ function drawGraph(data){
       data: data
   }]
 });
+}
 
-var scroller = Highcharts.charts[0].scroller;
-var navMin = scroller.xAxis.translate(scroller.zoomedMin, true);
-var navMax = scroller.xAxis.translate(scroller.zoomedMax, true);
-console.log('min: '+Math.round(navMin)+"\nmax: "+Math.round(navMax));
+function updatePostGreSQL(){
+  $.ajax({
+    type: 'GET',
+    dataType:'json',
+    url: getBaseURL() + 'feed_finder_transactions/' + 'update_postgre_world',
+    data: formData,
+    success:function(data){
+      console.log(data);
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+    console.log(textStatus, errorThrown);
+    }
 
+  });
 }
 
 function setUpDatePickers(){
