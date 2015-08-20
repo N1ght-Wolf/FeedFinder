@@ -1,139 +1,159 @@
 var map, world, adminOne, adminThree;
 var simpCounter = 0;
 var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms';
-var mapToken= 'pk.eyJ1IjoiZmVlZC1maW5kZXIiLCJhIjoiMDIyMGI4ZmU4ZmFlYTMxMDFlMjYyZmJmNzQ5OWJhOGEifQ.6cOhRAs3U0blI_n-cJxD0g';
-
+var mapToken = 'pk.eyJ1IjoiZmVlZC1maW5kZXIiLCJhIjoiMDIyMGI4ZmU4ZmFlYTMxMDFlMjYyZmJmNzQ5OWJhOGEifQ.6cOhRAs3U0blI_n-cJxD0g';
+var sidebar;
 $(document).ready(function() {
 
 	getColorRangeWorld();
 	getColorRangeAdminOne();
 	getColorRangeAdminThree();
+	map = L.map('map').setView([51.505, -0.09], 5);
 
-	L.mapbox.accessToken = mapToken;
-	map = L.mapbox.map('map', 'mapbox.streets')
-	.setView([37.8, -96], 2);
+
+
+	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+
+	geocoder = L.Control.geocoder().addTo(map);
+
+
+
+	sidebar = L.control.sidebar('sidebar').addTo(map);
+
 
 	mapZoomed();
 
 });
 
-function getColorRangeWorld(){
+function getColorRangeWorld() {
 
-	$.ajax
-	({
+	$.ajax({
 		dataType: 'json',
-		type:'GET',
-		data:{model:'World'},
+		type: 'GET',
+		data: {
+			model: 'World'
+		},
 		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
 		success: function(data) {
-			getWmsTiles(function(layer) { world = layer; world.addTo(map); },
-											data,
-											'worlds',
-											true);
-		}
-	});
-
-}
-function getColorRangeAdminOne(){
-
-	$.ajax
-	({
-		dataType: 'json',
-		type:'GET',
-		data:{model:'AdminOne'},
-		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
-		success: function(data) {
-			getWmsTiles(function(layer) { adminOne = layer },
-									data,
-									'admin_ones',
-									false);
+			getWmsTiles(function(layer) {
+					world = layer;
+					world.addTo(map);
+				},
+				data,
+				'worlds',
+				true);
 		}
 	});
 
 }
 
-function getColorRangeAdminThree(){
+function getColorRangeAdminOne() {
 
-	$.ajax
-	({
+	$.ajax({
 		dataType: 'json',
-		type:'GET',
-		data:{model:'UkAdminThree'},
+		type: 'GET',
+		data: {
+			model: 'AdminOne'
+		},
 		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
 		success: function(data) {
-			getWmsTiles(function(layer) { adminThree = layer;},
-									data,
-									'uk_admin_threes',
-									 false);
+			getWmsTiles(function(layer) {
+					adminOne = layer
+				},
+				data,
+				'admin_ones',
+				false);
 		}
 	});
 
 }
 
-function getWmsTiles(mapboxLayer, data, geoserverLayer, addToMap){
+function getColorRangeAdminThree() {
+
+	$.ajax({
+		dataType: 'json',
+		type: 'GET',
+		data: {
+			model: 'UkAdminThree'
+		},
+		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
+		success: function(data) {
+			getWmsTiles(function(layer) {
+					adminThree = layer;
+				},
+				data,
+				'uk_admin_threes',
+				false);
+		}
+	});
+
+}
+
+function getWmsTiles(mapboxLayer, data, geoserverLayer, addToMap) {
 	var first_q = data.first_q;
 	var second_q = data.second_q;
 	var third_q = data.third_q;
 
-  mapboxLayer(L.tileLayer.wms
-	(geoserverUrl+'?SERVICE=WMS&REQUEST=GetMap&env=first_q:'+first_q+';second_q:'+second_q+';third_q:'+third_q+';&VERSION=1.1.0', {
-			layers: 'cite:'+geoserverLayer,
-			format: 'image/png',
-			transparent: true,
-			version: '1.1.0',
-			tiled :true,
-			attribution: "myattribution",
-	})
- );
+	mapboxLayer(L.tileLayer.wms(geoserverUrl + '?SERVICE=WMS&REQUEST=GetMap&env=first_q:' + first_q + ';second_q:' + second_q + ';third_q:' + third_q + ';&VERSION=1.1.0', {
+		layers: 'cite:' + geoserverLayer,
+		format: 'image/png',
+		transparent: true,
+		version: '1.1.0',
+		tiled: true,
+		attribution: "myattribution",
+	}));
 
 
 
 
-	}
+}
 
-function currentLayer(){
-	if(map.hasLayer(world)){
+function currentLayer() {
+	if (map.hasLayer(world)) {
 		return world;
-	}else if (map.hasLayer(adminOne)){
+	} else if (map.hasLayer(adminOne)) {
 		return adminOne;
-	}else if (map.hasLayer(adminThree)){
+	} else if (map.hasLayer(adminThree)) {
 		return adminThree;
 	}
 }
 
 
 
-function mapZoomed(){
+function mapZoomed() {
 	map.on('zoomend', function(e) {
 		console.log(map.getZoom());
-	if (map.getZoom() >= 6 && map.getZoom() <= 10) {
-		if (simpCounter == 0 || simpCounter == 2) {
-			if(map.hasLayer(world)){
+		if (map.getZoom() >= 6 && map.getZoom() <= 10) {
+			if (simpCounter == 0 || simpCounter == 2) {
+				if (map.hasLayer(world)) {
 					map.removeLayer(world);
-			}
-			if(map.hasLayer(adminThree)){
+				}
+				if (map.hasLayer(adminThree)) {
 					map.removeLayer(adminThree);
+				}
+				adminOne.addTo(map);
+				simpCounter = 1;
 			}
-			adminOne.addTo(map);
-			simpCounter = 1;
-		}
-	} else if (map.getZoom() >= 11) {
-		if (simpCounter == 0 || simpCounter == 1) {
-		simpCounter = 2;
-				if(map.hasLayer(adminOne)){
+		} else if (map.getZoom() >= 11) {
+			if (simpCounter == 0 || simpCounter == 1) {
+				simpCounter = 2;
+				if (map.hasLayer(adminOne)) {
 					map.removeLayer(adminOne);
 				}
 				adminThree.addTo(map)
-		}
-	} else if (map.getZoom() <= 6) { //Return to original data
-		if (simpCounter == 1 || simpCounter == 2) {
-			if(map.hasLayer(adminOne)){
-				map.removeLayer(adminOne);
 			}
-			world.addTo(map);
-		simpCounter = 0;
+		} else if (map.getZoom() <= 6) { //Return to original data
+			if (simpCounter == 1 || simpCounter == 2) {
+				if (map.hasLayer(adminOne)) {
+					map.removeLayer(adminOne);
+				}
+				world.addTo(map);
+				simpCounter = 0;
+			}
 		}
-	}
 	});
 }
 

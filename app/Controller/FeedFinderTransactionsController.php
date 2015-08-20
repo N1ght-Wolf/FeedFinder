@@ -39,14 +39,14 @@ class FeedFinderTransactionsController extends AppController
       ini_set('max_execution_time', 300);
         $this->set('timespan_options', $this->timespan_options);
         $this->set('actions', $this->actions);
+
         //
         // $result = $this->FeedFinderTransaction->find('all',array(
         //   'fields'=>array('Venue.address','Venue.lat','Venue.lng','COUNT(Venue.address) AS mycount'),
         //   'group' =>array('Venue.address'),
         //   'conditions'=>array('FeedFinderTransaction.action'=>'review', 'Venue.iso'=>'GBR')
         // ));
-        //
-        //
+
         //         //$this->_print_array($query);
         //         foreach ($result as $key => $value) {
         //           $lat = $value['Venue']['lat'];
@@ -60,9 +60,47 @@ class FeedFinderTransactionsController extends AppController
         //         }
         // //
         // //
+}
 
 
+    public function stats(){
 
+    }
+
+    public function stats_submit(){
+      $this->autoRender = false;
+
+      if($this->request->is('ajax')){
+
+        $from = $this->request->query['from-date'];
+        $to = $this->request->query['to-date'];
+        $action = $this->request->query['action'];
+
+
+        $conditions = array('FeedFinderTransaction.created >=' => $from,
+                            'FeedFinderTransaction.created <=' => $to,
+                            'FeedFinderTransaction.action'=> strtolower($action));
+        $fields = array('UNIX_TIMESTAMP(FeedFinderTransaction.created) * 1000 AS timestamp','COUNT(FeedFinderTransaction.action) AS mycount');
+        $group = array('YEAR(FeedFinderTransaction.created)', 'MONTH(FeedFinderTransaction.created)', 'DAY(FeedFinderTransaction.created)');
+        $results = $this->FeedFinderTransaction->find('all',array(
+          'conditions'=>$conditions,
+          'fields'=>$fields,
+          'group'=>$group
+        ));
+
+        $final_array = array();
+      //  var_dump($results);
+
+        foreach ($results as $result => $value) {
+          $timestamp = floatval($value[0]['timestamp']);
+          $count = intval($value[0]['mycount']);
+          $some_arr = array($timestamp,$count);
+          $final_array[] = $some_arr;
+        // echo $this->_print_array($results);
+        }
+
+        echo json_encode($final_array);
+      }
     }
 
       public function world_review_range(){
