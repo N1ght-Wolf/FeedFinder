@@ -17,6 +17,15 @@ class FeedFinderTransaction extends Model {
          ),
          'User'=>array('type'=>'INNER')
      );
-   }
+  // 
+  // public $belongsTo = array(
+  //   'User' => array(
+  //     'className' => 'User'
+  //   ),
+  //   'Venue' => array(
+  //     'className' => 'Venue'
+  //   )
+  // );
+}
 
 ?>

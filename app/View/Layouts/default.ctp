@@ -23,36 +23,56 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 	<?php echo $this->Html->charset();
     ?>
 		<!-- <link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' /> -->
-		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+		<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+			<script src="https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js"></script>
+			<!-- <script src="https://rawgit.com/vogdb/Leaflet.ActiveLayers/master/dist/leaflet.active-layers.min.js"></script> -->
+			<script src="https://rawgit.com/ismyrnow/Leaflet.groupedlayercontrol/gh-pages/src/leaflet.groupedlayercontrol.js"></script>
+
+		<script type="text/javascript" src='https://rawgit.com/moment/moment/develop/moment.js'></script>
+		<script type="text/javascript" src='https://rawgit.com/moment/moment/master/locale/en-gb.js'></script>
+		<script type="text/javascript" src='https://rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/js/bootstrap-datetimepicker.min.js'></script>
+		<script src="http://malsup.github.com/jquery.form.js"></script>
+		<script src="https://rawgit.com/makinacorpus/Leaflet.Spin/master/leaflet.spin.js"></script>
+
+
+
+
+
+
+
+
+		<link href="https://rawgit.com/Leaflet/Leaflet.markercluster/master/dist/MarkerCluster.css" rel="stylesheet">
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
+		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"/>
+		<link href="https://rawgit.com/Leaflet/Leaflet.markercluster/master/dist/MarkerCluster.Default.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="https://rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/css/bootstrap-datetimepicker.min.css" media="screen" title="no title" charset="utf-8"/>
+
+		<link rel="https://raw.githubusercontent.com/ismyrnow/Leaflet.groupedlayercontrol/gh-pages/src/leaflet.groupedlayercontrol.css" media="screen" title="no title" charset="utf-8"/>
 
 		<?php
-		$this->Html->script('http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js', false);
+
 
           echo $this->fetch('meta');
           echo $this->fetch('css');
           echo $this->fetch('script');
 
   				echo $this->Html->meta('icon');
-					echo $this->Html->script('jquery');
 					echo $this->Html->script('jquery-ui');
+
 					echo $this->Html->script('leaflet-map');
 					echo $this->Html->script('leaflet-sidebar');
 					echo $this->Html->script('Control.Geocoder');
-					echo $this->Html->script('highstock.js');
+					echo $this->Html->script('highstock');
+					echo $this->Html->script('spin.min');
+					echo $this->Html->script('Control.Loading');
 
-
-  				//echo $this->Html->css('cake.generic');
-					echo $this->Html->css('main');
 					echo $this->Html->css('jquery-ui');
 					echo $this->Html->css('leaflet-sidebar');
 					echo $this->Html->css('bootstrap.min');
 					echo $this->Html->css('Control.Geocoder');
+					echo $this->Html->css('Control.Loading');
 					echo $this->Html->script('stats');
-
-
-
-					//echo $this->Html->script('highmaps');
 ?>
 	<title>
 		<?php echo $cakeDescription ?>:
@@ -62,12 +82,10 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
 </head>
 <body>
-	<div id="container">
-		<div id="header">
-		</div>
-		<div id="content">
+	<?php echo $this->element('navbar');
+	?>
+	<div id="container-fluid" class="content">
 			<?php echo $this->fetch('content'); ?>
-		</div>
 		<div id="footer">
 
 		</div>

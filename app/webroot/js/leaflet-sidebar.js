@@ -1,3 +1,4 @@
+var tab;
 L.Control.Sidebar = L.Control.extend({
     includes: L.Mixin.Events,
 
@@ -137,11 +138,28 @@ L.Control.Sidebar = L.Control.extend({
         return this;
     },
 
+
+    getActiveTab: function(){
+      return this._getActiveTab();
+    },
+    _getActiveTab: function() {
+        for (var i = this._tabitems.length - 1; i >= 0; i--) {
+            var child = this._tabitems[i];
+            if (L.DomUtil.hasClass(child, 'active')){
+              return child.querySelector('a').hash.slice(1);
+
+            }
+        }
+    },
     _onClick: function(e) {
-        if (L.DomUtil.hasClass(this, 'active'))
+        if (L.DomUtil.hasClass(this, 'active')){
             this._sidebar.close();
-        else if (!L.DomUtil.hasClass(this, 'disabled'))
-            this._sidebar.open(this.querySelector('a').hash.slice(1));
+          }
+        else if (!L.DomUtil.hasClass(this, 'disabled')){
+        tab = this.querySelector('a').hash.slice(1);
+        this._sidebar.open(tab);
+        
+      }
     },
 
     _onCloseClick: function () {

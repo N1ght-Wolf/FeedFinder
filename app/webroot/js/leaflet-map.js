@@ -1,161 +1,136 @@
-var map, world, adminOne, adminThree;
+var map, world, adminOne, ukAdminThree;
+var layers = [];
 var simpCounter = 0;
 var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms';
 var mapToken = 'pk.eyJ1IjoiZmVlZC1maW5kZXIiLCJhIjoiMDIyMGI4ZmU4ZmFlYTMxMDFlMjYyZmJmNzQ5OWJhOGEifQ.6cOhRAs3U0blI_n-cJxD0g';
 var sidebar;
+var customMarker;
+var allowToZoom = true;
 $(document).ready(function() {
 
-	getColorRangeWorld();
-	getColorRangeAdminOne();
-	getColorRangeAdminThree();
-	map = L.map('map').setView([51.505, -0.09], 5);
+	var cities = new L.LayerGroup();
+ 	var grayscale =	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		maxZoom: 18,
+		id: 'davidoyeku.n73bd296',
+		accessToken: mapToken
+	});
 
+	var blackwhite =	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+	maxZoom: 18,
+	id: 'davidoyeku.6946bcbf',
+	accessToken: mapToken
+});
+	map = L.map('map',{
+      center: [51.505, -0.09],
+      zoom: 5,
+      layers: [grayscale, cities]
+    });
 
-
-	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(map);
-
-
-	geocoder = L.Control.geocoder().addTo(map);
-
-
-
-	sidebar = L.control.sidebar('sidebar').addTo(map);
+	var baseLayers = {
+    "Grayscale": grayscale,
+		"blackwhite":blackwhite
+	  };
+	var groupedOverlays = {
+      "Landmarks": {
+        "Cities": cities,
+      }
+    };
+    // Make the "Landmarks" group exclusive (use radio inputs)
+    var options = { exclusiveGroups: ["Landmarks"], groupCheckboxes: true };
+    // Use the custom grouped layer control, not "L.control.layers"
+    var layerControl = L.control.groupedLayers(baseLayers, groupedOverlays, options);
+    map.addControl(layerControl);
 
 
 	mapZoomed();
+	geocoder = L.Control.geocoder().addTo(map);
+	sidebar = L.control.sidebar('sidebar');
+	sidebar.addTo(map);
+
+	customMarker = L.Marker.extend({
+   options: {
+   }
+});
+
+
 
 });
 
-function getColorRangeWorld() {
-
-	$.ajax({
-		dataType: 'json',
-		type: 'GET',
-		data: {
-			model: 'World'
-		},
-		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
-		success: function(data) {
-			getWmsTiles(function(layer) {
-					world = layer;
-					world.addTo(map);
-				},
-				data,
-				'worlds',
-				true);
-		}
-	});
-
-}
-
-function getColorRangeAdminOne() {
-
-	$.ajax({
-		dataType: 'json',
-		type: 'GET',
-		data: {
-			model: 'AdminOne'
-		},
-		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
-		success: function(data) {
-			getWmsTiles(function(layer) {
-					adminOne = layer
-				},
-				data,
-				'admin_ones',
-				false);
-		}
-	});
-
-}
-
-function getColorRangeAdminThree() {
-
-	$.ajax({
-		dataType: 'json',
-		type: 'GET',
-		data: {
-			model: 'UkAdminThree'
-		},
-		url: getBaseURL() + '/feed_finder_transactions/' + 'world_review_range',
-		success: function(data) {
-			getWmsTiles(function(layer) {
-					adminThree = layer;
-				},
-				data,
-				'uk_admin_threes',
-				false);
-		}
-	});
-
-}
-
-function getWmsTiles(mapboxLayer, data, geoserverLayer, addToMap) {
-	var first_q = data.first_q;
-	var second_q = data.second_q;
-	var third_q = data.third_q;
-
-	mapboxLayer(L.tileLayer.wms(geoserverUrl + '?SERVICE=WMS&REQUEST=GetMap&env=first_q:' + first_q + ';second_q:' + second_q + ';third_q:' + third_q + ';&VERSION=1.1.0', {
-		layers: 'cite:' + geoserverLayer,
-		format: 'image/png',
-		transparent: true,
-		version: '1.1.0',
-		tiled: true,
-		attribution: "myattribution",
-	}));
 
 
-
-
-}
-
-function currentLayer() {
-	if (map.hasLayer(world)) {
-		return world;
-	} else if (map.hasLayer(adminOne)) {
-		return adminOne;
-	} else if (map.hasLayer(adminThree)) {
-		return adminThree;
+function removeMapLayer(layer) {
+	if (map.hasLayer(layer)) {
+		map.removeLayer(layer);
 	}
 }
 
-
-
 function mapZoomed() {
 	map.on('zoomend', function(e) {
-		console.log(map.getZoom());
-		if (map.getZoom() >= 6 && map.getZoom() <= 10) {
-			if (simpCounter == 0 || simpCounter == 2) {
-				if (map.hasLayer(world)) {
-					map.removeLayer(world);
+		if (allowToZoom) {
+			if (map.getZoom() >= 6 && map.getZoom() <= 10) {
+				if (simpCounter == 0 || simpCounter == 2) {
+					if (map.hasLayer(world)) {
+						map.removeLayer(world);
+					}
+					if (map.hasLayer(ukAdminThree)) {
+						map.removeLayer(ukAdminThree);
+					}
+					adminOne.addTo(map);
+					simpCounter = 1;
 				}
-				if (map.hasLayer(adminThree)) {
-					map.removeLayer(adminThree);
+			} else if (map.getZoom() >= 11) {
+				if (simpCounter == 0 || simpCounter == 1) {
+					simpCounter = 2;
+					if (map.hasLayer(adminOne)) {
+						map.removeLayer(adminOne);
+					}
+					ukAdminThree.addTo(map)
 				}
-				adminOne.addTo(map);
-				simpCounter = 1;
-			}
-		} else if (map.getZoom() >= 11) {
-			if (simpCounter == 0 || simpCounter == 1) {
-				simpCounter = 2;
-				if (map.hasLayer(adminOne)) {
-					map.removeLayer(adminOne);
+			} else if (map.getZoom() <= 6) { //Return to original data
+				if (simpCounter == 1 || simpCounter == 2) {
+					if (map.hasLayer(adminOne)) {
+						map.removeLayer(adminOne);
+					}
+					world.addTo(map);
+					simpCounter = 0;
 				}
-				adminThree.addTo(map)
-			}
-		} else if (map.getZoom() <= 6) { //Return to original data
-			if (simpCounter == 1 || simpCounter == 2) {
-				if (map.hasLayer(adminOne)) {
-					map.removeLayer(adminOne);
-				}
-				world.addTo(map);
-				simpCounter = 0;
 			}
 		}
 	});
 }
+
+function disableMapInteraction() {
+	map.dragging.disable();
+	map.touchZoom.disable();
+	map.doubleClickZoom.disable();
+	map.scrollWheelZoom.disable();
+	map.boxZoom.disable();
+	map.keyboard.disable();
+	if (map.tap) map.tap.disable();
+	document.getElementById('map').style.cursor = 'default';
+}
+
+function enableMapInteraction() {
+	map.dragging.enable();
+	map.touchZoom.enable();
+	map.doubleClickZoom.enable();
+	map.scrollWheelZoom.enable();
+	map.boxZoom.enable();
+	map.keyboard.enable();
+	if (map.tap) map.tap.enable();
+	document.getElementById('map').style.cursor = 'grab';
+}
+
+function removeChoroplethLayers(){
+	console.log(layers);
+	for(var i=0; i<layers.length; i++){
+			removeMapLayer(layers[i]);
+			layers.splice(i,1);
+	}
+}
+
 
 function getBaseURL() {
 	var url = location.href;
