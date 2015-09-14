@@ -30,6 +30,9 @@
  */
 	Router::connect('/pages/*', array('controller' => 'pages', 'action' => 'display'));
 
+	Router::connect('/:venues/:id', array('controller' => 'venues', 'action' => 'index'), array('pass'=>array('id'),'id'=>'[0-9]+'));
+
+
 /**
  * Load all plugin routes. See the CakePlugin documentation on
  * how to customize the loading of plugin routes.

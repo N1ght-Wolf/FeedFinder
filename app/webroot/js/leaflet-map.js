@@ -6,45 +6,39 @@ var mapToken = 'pk.eyJ1IjoiZmVlZC1maW5kZXIiLCJhIjoiMDIyMGI4ZmU4ZmFlYTMxMDFlMjYyZ
 var sidebar;
 var customMarker;
 var allowToZoom = true;
+var reviewRating;
+var reviewCount;
 $(document).ready(function() {
+	reviewRating = new L.LayerGroup();
+	reviewCount = new L.LayerGroup();
 
-	var cities = new L.LayerGroup();
- 	var grayscale =	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+
+	 L.marker([39.61, -105.02]).bindPopup('Littleton, CO.').addTo(reviewRating);
+	 L.marker([39.74, -104.99]).bindPopup('Denver, CO.').addTo(reviewRating);
+	 L.marker([39.73, -104.8]).bindPopup('Aurora, CO.').addTo(reviewRating);
+	 L.marker([39.77, -105.23]).bindPopup('Golden, CO.').addTo(reviewRating);
+
+ 	var street =	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		maxZoom: 18,
 		id: 'davidoyeku.n73bd296',
 		accessToken: mapToken
 	});
 
-	var blackwhite =	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-	maxZoom: 18,
-	id: 'davidoyeku.6946bcbf',
-	accessToken: mapToken
-});
 	map = L.map('map',{
       center: [51.505, -0.09],
       zoom: 5,
-      layers: [grayscale, cities]
+      layers: [street, reviewRating]
     });
-
-	var baseLayers = {
-    "Grayscale": grayscale,
-		"blackwhite":blackwhite
-	  };
-	var groupedOverlays = {
-      "Landmarks": {
-        "Cities": cities,
-      }
-    };
-    // Make the "Landmarks" group exclusive (use radio inputs)
-    var options = { exclusiveGroups: ["Landmarks"], groupCheckboxes: true };
-    // Use the custom grouped layer control, not "L.control.layers"
-    var layerControl = L.control.groupedLayers(baseLayers, groupedOverlays, options);
-    map.addControl(layerControl);
+    // // Make the "Landmarks" group exclusive (use radio inputs)
 
 
-	mapZoomed();
+		map.on('overlayadd', onOverlayAdd);
+
+		function onOverlayAdd(e){
+		    console.log(e);
+		}
+	// mapZoomed();
 	geocoder = L.Control.geocoder().addTo(map);
 	sidebar = L.control.sidebar('sidebar');
 	sidebar.addTo(map);

@@ -32,7 +32,7 @@ $(document).ready(function() {
 
 
 function formPackage(formData) {
-  $('#'+sidebar.getActiveTab()+'-info').toggle();
+	$('#' + sidebar.getActiveTab() + '-info').toggle();
 	switch (sidebar.getActiveTab()) {
 		case 'review':
 
@@ -146,18 +146,19 @@ function getWmsTiles(data) {
 	console.log(geoserverLayer);
 
 	return L.tileLayer.wms(geoserverUrl +
-    '?SERVICE=WMS&REQUEST=GetMap&env=first_q:' + first_q + ';second_q:' + second_q + ';third_q:' + third_q + ';&VERSION=1.1.0', {
-		layers: 'cite:' + geoserverLayer,
-		format: 'image/png',
-		transparent: true,
-		version: '1.1.0',
-		tiled: true,
-		attribution: "myattribution",
-	});
+		'?SERVICE=WMS&REQUEST=GetMap&env=first_q:' + first_q + ';second_q:' + second_q + ';third_q:' + third_q + ';&VERSION=1.1.0', {
+			layers: 'cite:' + geoserverLayer,
+			format: 'image/png',
+			transparent: true,
+			version: '1.1.0',
+			tiled: true,
+			attribution: "myattribution",
+		});
 }
 
 function venuesFormSubmit(formData) {
-  $('#venue-info').toggle();
+	$('#venue-info').toggle();
+	map.spin(true);
 	console.log('in venues form submit ...');
 	$.when(
 		$.ajax({
@@ -176,7 +177,11 @@ function venuesFormSubmit(formData) {
 		$.ajax({
 			type: 'GET',
 			url: $.ajaxSettings.url + "average_rating",
-			data: {form:formData, group:'Venue.iso',model:'World'},
+			data: {
+				form: formData,
+				group: 'Venue.iso',
+				model: 'World'
+			},
 			success: function(data) {
 				console.log('ajax success from: venues...');
 				console.log(data);
@@ -188,23 +193,63 @@ function venuesFormSubmit(formData) {
 		$.ajax({
 			type: 'GET',
 			url: $.ajaxSettings.url + "average_rating",
-			data: {form:formData, group:'Venue.city',model:'AdminOne'},
+			data: {
+				form: formData,
+				group: 'Venue.city',
+				model: 'AdminOne'
+			},
 		}),
 		$.ajax({
 			type: 'GET',
 			url: $.ajaxSettings.url + "average_rating",
-			data: {form:formData, group:'Venue.address',model:'UkAdminThree'},
-		})
-	).done(function(a,b,c,d){
-		console.log('here');
-		console.log(a);
-		console.log(b);
-		console.log(c);
-		console.log(d);
+			data: {
+				form: formData,
+				group: 'Venue.address',
+				model: 'UkAdminThree'
+			},
+		}),
+		ajaxSubmit(formData, 'review_interq_ukadminthree'),
+		ajaxSubmit(formData, 'review_interq_adminone'),
+		ajaxSubmit(formData, 'review_interq_world')
+	).done(function(a, b, c, d,e,f,g) {
 		world = getWmsTiles(b[0]);
 		adminOne = getWmsTiles(c[0]);
 		ukAdminThree = getWmsTiles(d[0]);
-		world.addTo(map);
+		var uk2 = getWmsTiles(e[0]);
+		var county2 = getWmsTiles(f[0]);
+		var world2 = getWmsTiles(g[0]);
+
+
+		var overlays = [{
+			groupName: "Review count",
+			expanded: true,
+			layers: {
+				'country':uk2,
+				'county':county2,
+					'UK SOA':world2
+			}
+		},{
+			groupName: "Review rating",
+			expanded: true,
+			layers: {
+				"country": world,
+				"county": adminOne,
+				"UK SOA": ukAdminThree
+			}
+		}];
+
+		var options = {
+				container_width 	: "300px",
+				group_maxHeight     : "80px",
+				//container_maxHeight : "350px",
+				exclusive       	: false
+			};
+		// Use the custom grouped layer control, not "L.control.layers"
+		var control = L.Control.styledLayerControl(null, overlays, options);
+ 			map.addControl(control);
+
+			map.spin(false);
+
 
 	});
 
@@ -310,28 +355,28 @@ function drawMarkers(data) {
 	var title, marker;
 	console.log(markers);
 	for (var i = 0; i < data.length; i++) {
-    venue = data[i]['Venue'];
+		venue = data[i]['Venue'];
 		review = data[i]['Review'];
 
 		lat = venue.lat;
 		lng = venue.lng
-    title="	<div class='span4'>"+
-  		    		'<h4>'+venue.name+'</h4>'+
-							'<a>'+review.length+' review(s)</a>'+
-  		    		'<address>'+
-  		    			'<strong>'+venue.address+'</strong><br>'+
-  		    			venue.city+'<br>'+
-                venue.postalCode+'<br>'+
-                venue.created+'<br>'+
-  		    		'</address>'+
-  		    	"</div>";
+		title = "	<div class='span4'>" +
+			'<h4>' + venue.name + '</h4>' +
+			'<a href=http://localhost/am-analytics/venues/'+venue.id+'>' + review.length + ' review(s)</a>' +
+			'<address>' +
+			'<strong>' + venue.address + '</strong><br>' +
+			venue.city + '<br>' +
+			venue.postalCode + '<br>' +
+			venue.created + '<br>' +
+			'</address>' +
+			"</div>";
 		length = data[i]['Review'].length;
 		if (length > 0) {
 			marker = L.marker(new L.latLng(lat, lng), {
 				title: title,
-				review:data[i]['Review'],
-				venues:data[i]['Venue'],
-        riseOnHover: true
+				review: data[i]['Review'],
+				venues: data[i]['Venue'],
+				riseOnHover: true
 			});
 			marker.bindPopup(title);
 			markers.addLayer(marker);
@@ -343,48 +388,42 @@ function drawMarkers(data) {
 		$('#venue-info').empty();
 		var review = a.layer.options.review;
 		var venue = a.layer.options.venues;
-		var title = "<div class='page-header' id='star'>"+
-				"<h4>"+venue.name.toUpperCase()+"</h4></div>";
-				$('#venue-info').append(title);
+		var title = "<div class='page-header' id='star'>" +
+			"<h4>" + venue.name.toUpperCase() + "</h4></div>";
+		$('#venue-info').append(title);
 
-		for(var i=0; i<review.length; i++){
-			var reviewText =  review[i].review_text;
-			if(reviewText == null){
+		for (var i = 0; i < review.length; i++) {
+			var reviewText = review[i].review_text;
+			if (reviewText == null) {
 				reviewText = 'no comments was left';
 			}
 
-			var reviewHtml = "<p>"+reviewText+"</p>";
-			var createdHtml ="<p>"+ review[i].created+"</p>";
+			var reviewHtml = "<p>" + reviewText + "</p>";
+			var createdHtml = "<p>" + review[i].created + "</p>";
 
 
 			console.log(title);
 			console.log(reviewHtml);
 			console.log(createdHtml);
 
-				$('#venue-info').append(reviewHtml);
-				$('#venue-info').append(createdHtml);
-				$('#venue-info').append('<hr>');
+			$('#venue-info').append(reviewHtml);
+			$('#venue-info').append(createdHtml);
+			$('#venue-info').append('<hr>');
 
 
 
-    }
+		}
 
-		});
+	});
 	markers.on('clusterclick', function(a) {
 		$('#venues-panel').empty();
 		console.log(a.layer.getAllChildMarkers());
 		var childMarkers = a.layer.getAllChildMarkers();
-    for(var i=0; i<childMarkers.length; i++){
-			var child =  childMarkers[i];
+		for (var i = 0; i < childMarkers.length; i++) {
+			var child = childMarkers[i];
 			// $('#venues-info').append(child.options.title);
 			console.log(a);
-    }
-	  //  var obj = JSON.parse(a.layer.options.title);
-		 //
-    //  $('#venue-stats').empty();
-    //  $( "<p>Location Name: "+obj.Venue.name+"</p>" ).appendTo( "#venue-stats" );
-    //  $('#venue-stats').show();
-    //  console.log(a);
+		}
 
 	});
 

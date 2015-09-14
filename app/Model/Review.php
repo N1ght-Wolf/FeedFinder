@@ -129,4 +129,33 @@ class Review extends Model
       }
       return $return;
     }
+    public function getAverageVenueRating($id){
+
+      $field = array(
+                     'round(AVG(Review.q1),1) as q1' ,
+                     'round(AVG(Review.q2),1) as q2' ,
+                     'round(AVG(Review.q3),1) as q3' ,
+                     'round(AVG(Review.q4),1) as q4'
+                   );
+      $conditions = array('Review.venue_id'=> $id);
+      $results =  $this->find('all',array(
+        'fields'=>$field,
+        'conditions'=>$conditions
+      ));
+
+
+      return $results;
+    }
+
+    public function getReviewPaginated($data){
+      $id = $data['id'];
+      $start = $data['start'];
+      $start = ($start -1)*5;
+      $end = $data['end'];
+      return $this->find('all',array(
+        'conditions'=>array('Venue.id'=>$id),
+        'offset'=>$start,
+        'limit'=>$end
+    ));
+    }
 }
