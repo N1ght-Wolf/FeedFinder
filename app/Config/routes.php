@@ -31,6 +31,10 @@
 	Router::connect('/pages/*', array('controller' => 'pages', 'action' => 'display'));
 
 	Router::connect('/:venues/:id', array('controller' => 'venues', 'action' => 'index'), array('pass'=>array('id'),'id'=>'[0-9]+'));
+	Router::connect('/:venues/:id/:year/:month/:day', array('controller' => 'venues', 'action' => 'index'), array('pass'=>array('id','year','month','day'),'id'=>'[0-9]+','year' => '[12][0-9]{3}',
+        'month' => '0[1-9]|1[012]',
+        'day' => '0[1-9]|[12][0-9]|3[01]'));
+
 
 
 /**

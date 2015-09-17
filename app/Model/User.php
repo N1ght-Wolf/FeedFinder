@@ -28,7 +28,7 @@ class User extends Model {
     ));
 
     $reviewArray;
-    $venueIdArray;
+    $venueIdArray = array();
     foreach ($results as $result => $value) {
       $reviewArray = $value['Review'];
       if(!empty($reviewArray))

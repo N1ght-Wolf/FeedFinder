@@ -20,8 +20,8 @@ class FeedFinderTransactionsController extends AppController
 
     public function index()
     {
-        ini_set('memory_limit', '2048M');
-        ini_set('max_execution_time', 300);
+        // ini_set('memory_limit', '2048M');
+        // ini_set('max_execution_time', 300);
     }
 
     public function stats()
@@ -114,9 +114,15 @@ class FeedFinderTransactionsController extends AppController
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
             $results = $this->User->getUserBaseLocation($this->request->query);
+            if(!empty($results)){
             $latlng = $this->Venue->getLatLng($results);
             $quartiles = $this->World->updateUserCount($latlng);
             echo json_encode($quartiles);
+          }else{
+            $quartiles = array('first_q'=>0,'second_q'=>0,'third_q'=>0, 'geo_layer_name'=>'admin_ones','results'=>0);
+            echo json_encode($quartiles);
+
+          }
         }
     }
     public function users_interq_adminone()
@@ -124,9 +130,16 @@ class FeedFinderTransactionsController extends AppController
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
             $results = $this->User->getUserBaseLocation($this->request->query);
-            $latlng = $this->Venue->getLatLng($results);
-            $quartiles = $this->AdminOne->updateUserCount($latlng);
-            echo json_encode($quartiles);
+            if(!empty($results)){
+              $latlng = $this->Venue->getLatLng($results);
+              $quartiles = $this->AdminOne->updateUserCount($latlng);
+              echo json_encode($quartiles);
+            }else{
+              $quartiles = array('first_q'=>0,'second_q'=>0,'third_q'=>0, 'geo_layer_name'=>'admin_ones','results'=>0);
+              echo json_encode($quartiles);
+
+            }
+
         }
     }
     public function users_interq_ukadminone()
@@ -134,44 +147,15 @@ class FeedFinderTransactionsController extends AppController
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
             $results = $this->User->getUserBaseLocation($this->request->query);
+            if(!empty($results)){
             $latlng = $this->Venue->getLatLng($results);
             $quartiles = $this->UkAdminThree->updateUserCount($latlng);
             echo json_encode($quartiles);
-        }
-    }
+          }else{
+            $quartiles = array('first_q'=>0,'second_q'=>0,'third_q'=>0, 'geo_layer_name'=>'admin_ones','results'=>0);
+            echo json_encode($quartiles);
 
-    public function stats_submit()
-    {
-        $this->autoRender = false;
-
-        if ($this->request->is('ajax')) {
-            $from = $this->request->query['from-date'];
-            $to = $this->request->query['to-date'];
-            $action = $this->request->query['action'];
-
-            $conditions = array('FeedFinderTransaction.created >=' => $from,
-                            'FeedFinderTransaction.created <=' => $to,
-                            'FeedFinderTransaction.action' => strtolower($action), );
-            $fields = array('UNIX_TIMESTAMP(FeedFinderTransaction.created) * 1000 AS timestamp','COUNT(FeedFinderTransaction.action) AS mycount');
-            $group = array('YEAR(FeedFinderTransaction.created)', 'MONTH(FeedFinderTransaction.created)', 'DAY(FeedFinderTransaction.created)');
-            $results = $this->FeedFinderTransaction->find('all', array(
-          'conditions' => $conditions,
-          'fields' => $fields,
-          'group' => $group,
-        ));
-
-            $final_array = array();
-      //  var_dump($results);
-
-        foreach ($results as $result => $value) {
-            $timestamp = floatval($value[0]['timestamp']);
-            $count = intval($value[0]['mycount']);
-            $some_arr = array($timestamp,$count);
-            $final_array[] = $some_arr;
-        // echo $this->_print_array($results);
-        }
-
-            echo json_encode($final_array);
+          }
         }
     }
 
@@ -197,29 +181,6 @@ class FeedFinderTransactionsController extends AppController
             $results['active_users'] = intval($ans[0][0]['activeUsers']);
 
             echo json_encode($results);
-        }
-    }
-
-    public function userGraphData()
-    {
-        $this->autoRender = false;
-        if ($this->request->is('ajax')) {
-            echo json_encode($this->User->getUserGraphData($this->request->query));
-        }
-    }
-
-    public function actions()
-    {
-        $this->autoRender = false;
-        if ($this->request->is('ajax')) { //access the values by index
-        $selected_action = $this->request->query('actions');
-            $selected_timespan = $this->request->query('timespan');
-            $conditions = $this->_timespan_condition_switch($selected_action, $selected_timespan);
-            $result = $this->FeedFinderTransaction->find('all',
-        array('fields' => array('FeedFinderTransaction.created'),
-              'order' => 'FeedFinderTransaction.created',
-              'conditions' => $conditions, ));
-            echo json_encode($this->_calc_graph_data($result));
         }
     }
 

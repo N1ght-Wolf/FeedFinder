@@ -43,7 +43,6 @@ class Venue extends Model
       foreach ($results as $result => $value) {
           $latlng[] = $value['Venue'];
       }
-
         return $latlng;
     }
 

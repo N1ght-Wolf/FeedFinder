@@ -2,8 +2,7 @@
   <div class="form-group">
     <label for="sel1">Select list:</label>
     <select class="form-control" name='form-timespan'>
-      <option>None</option>
-      <option>Today</option>
+      <option >Today</option>
       <option>Yesterday</option>
       <option>This week</option>
       <option>Last week</option>

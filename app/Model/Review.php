@@ -129,7 +129,12 @@ class Review extends Model
       }
       return $return;
     }
-    public function getAverageVenueRating($id){
+
+
+    public function getVenueAttributeRating($data){
+      $id = $data['id'];
+      $from = $data['from'];
+      $to = $data['to'];
 
       $field = array(
                      'round(AVG(Review.q1),1) as q1' ,
@@ -137,25 +142,76 @@ class Review extends Model
                      'round(AVG(Review.q3),1) as q3' ,
                      'round(AVG(Review.q4),1) as q4'
                    );
-      $conditions = array('Review.venue_id'=> $id);
+      $conditions = array(
+      'Review.venue_id'=> $id,
+      'Review.created >=' => $from,
+      'Review.created <=' => $to
+      );
       $results =  $this->find('all',array(
         'fields'=>$field,
         'conditions'=>$conditions
       ));
-
-
       return $results;
     }
+
+    public function getVenueAvgRating($id){
+      $field = array('AVG(Review.average_rating) AS average_rating');
+      $condition = array('Review.venue_id'=>$id);
+      return $this->find('first',array(
+        'fields'=>$field,
+        'conditions'=>$condition
+      ));
+    }
+
+
+
 
     public function getReviewPaginated($data){
       $id = $data['id'];
       $start = $data['start'];
       $start = ($start -1)*5;
       $end = $data['end'];
+      $order = $data['order'];
+      $from = $data['from'];
+      $to = $data['to'];
+      $conditions = array('Review.created >=' => $from,
+                      'Review.created <=' => $to,
+                      'Venue.id'=>$id
+                      );
       return $this->find('all',array(
-        'conditions'=>array('Venue.id'=>$id),
+        'conditions'=>$conditions,
         'offset'=>$start,
-        'limit'=>$end
+        'limit'=>$end,
+        'order'=>array('Review.created '.$order)
     ));
+    }
+
+
+    public function getVenueReviews($data){
+      $from = $data['from'];
+      $to = $data['to'];
+      $id = $data['to'];
+      $conditions = array('Review.created >=' => $from,
+                      'Review.created <=' => $to,
+                      'Review.venue_id'=>$id
+                      );
+      return $this->find('all',array(
+        'conditions'=>$conditions
+      ));
+
+    }
+
+    public function getVenuePerformance($data, $low_end, $high_end){
+      $from = $data['from'];
+      $to = $data['to'];
+      $id = $data['id'];
+      $conditions = array(
+                      'Review.created >=' => $from,
+                      'Review.created <=' => $to,
+                      'Review.venue_id'=>$id,
+                      'Review.average_rating >='=> $low_end,
+                      'Review.average_rating <'=>$high_end
+                      );
+      return $this->find('count',array('conditions'=>$conditions));
     }
 }

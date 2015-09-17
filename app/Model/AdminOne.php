@@ -38,9 +38,7 @@ class AdminOne extends Model {
       $results = $this->find('all', array('order' => array("AdminOne.$column ASC"),
                                         'fields' => array("AdminOne.$column"),
                                         'conditions' => array("AdminOne.$column > 0"), ));
-      // echo "<pre>";
-      // print_r($results);
-      // echo "</pre>";
+
       $vals = array();
       foreach ($results as $key => $value) {
           $vals[] = $value['AdminOne']["$column"];

@@ -1,5 +1,5 @@
 var form;
-var userSelect, reviewSelect, venueSelect;
+var userSelect, venueSelect;
 var markers;
 $.ajaxSetup({
 	url: getBaseURL() + 'feed_finder_transactions/',
@@ -11,21 +11,19 @@ $(document).ready(function() {
 	markers = new L.MarkerClusterGroup();
 
 	form = $('.query-form');
-	var userSelect = $(form).eq(0).find('select');
-	var reviewSelect = $(form).eq(1).find('select');
-	var venueSelect = $(form).eq(2).find('select');
+	userSelect = $(form).eq(0).find('select');
+	venueSelect = $(form).eq(1).find('select');
 
-	var selectors = [userSelect, reviewSelect, venueSelect];
+
+	var selectors = [userSelect, venueSelect];
 	$(selectors).each(function() {
 		$(this).change(function() {
-			console.log('clicked');
 			var position = $(this).prop('selectedIndex');
-			var formData = getDateRange(position, this);
+			console.log(position);
+			var formData = getDateRange(position, "YYYY-MM-DD HH:mm:ss");
 			formPackage(formData);
 		});
 	});
-
-
 });
 
 
@@ -34,10 +32,6 @@ $(document).ready(function() {
 function formPackage(formData) {
 	$('#' + sidebar.getActiveTab() + '-info').toggle();
 	switch (sidebar.getActiveTab()) {
-		case 'review':
-
-			reviewFormSubmit(formData);
-			break;
 		case 'users':
 			url = 'get_stats_users'
 			usersFormSubmit(formData);
@@ -52,90 +46,63 @@ function formPackage(formData) {
 }
 
 
-
-function getDateRange(pos, select) {
+function getDateRange(pos, format) {
 	var fromDate, toDate;
-	console.log(pos);
 	switch (pos) {
-		case 1: //today
-			toDate = moment().endOf('day').format("YYYY-MM-DD  HH:mm:ss");
-			fromDate = moment().startOf('day').format("YYYY-MM-DD  HH:mm:ss");
+		case 0: //today
+			toDate = moment().endOf('day').format(format);
+			fromDate = moment().startOf('day').format(format);
 
 			break;
-		case 2: //yesterday
-			fromDate = moment().subtract(1, 'days').startOf('day').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().subtract(1, 'days').endOf('day').format("YYYY-MM-DD  HH:mm:ss");
+		case 1: //yesterday
+			fromDate = moment().subtract(1, 'days').startOf('day').format(format);
+			toDate = moment().subtract(1, 'days').endOf('day').format(format);
 
 			break;
-		case 3: //this week
+		case 2: //this week
 
-			fromDate = moment().startOf('isoWeek').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().endOf('isoWeek').format("YYYY-MM-DD  HH:mm:ss");
+			fromDate = moment().startOf('isoWeek').format(format);
+			toDate = moment().endOf('isoWeek').format(format);
 
 			break;
-		case 4: //last week
-			fromDate = moment().subtract(1, 'weeks').startOf('isoWeek').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().subtract(1, 'weeks').endOf('isoWeek').format("YYYY-MM-DD  HH:mm:ss");
+		case 3: //last week
+			fromDate = moment().subtract(1, 'weeks').startOf('isoWeek').format(format);
+			toDate = moment().subtract(1, 'weeks').endOf('isoWeek').format(format);
 			break;
-		case 5: //this month
-			fromDate = moment().startOf('month').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().endOf('month').format("YYYY-MM-DD  HH:mm:ss");
+		case 4: //this month
+			fromDate = moment().startOf('month').format(format);
+			toDate = moment().endOf('month').format(format);
 			break;
-		case 6: //last month
-			fromDate = moment().subtract(1, 'months').startOf('month').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().subtract(1, 'months').endOf('month').format("YYYY-MM-DD  HH:mm:ss");
+		case 5: //last month
+			fromDate = moment().subtract(1, 'months').startOf('month').format(format);
+			toDate = moment().subtract(1, 'months').endOf('month').format(format);
 			break;
-		case 7: //last 3 months
-			fromDate = moment().subtract(3, 'months').startOf('month').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().endOf('month').format("YYYY-MM-DD  HH:mm:ss");
+		case 6: //last 3 months
+			fromDate = moment().subtract(3, 'months').startOf('month').format(format);
+			toDate = moment().endOf('month').format(format);
 			break;
-		case 8: //last 6 months
-			fromDate = moment().subtract(6, 'months').startOf('month').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().endOf('month').format("YYYY-MM-DD  HH:mm:ss");
+		case 7: //last 6 months
+			fromDate = moment().subtract(6, 'months').startOf('month').format(format);
+			toDate = moment().endOf('month').format(format);
 			break;
-		case 9: //this year
-			fromDate = moment().startOf('year').format("YYYY-MM-DD  HH:mm:ss");
-			toDate = moment().endOf('year').format("YYYY-MM-DD  HH:mm:ss");
+		case 8: //this year
+			fromDate = moment().startOf('year').format(format);
+			toDate = moment().endOf('year').format(format);
 			break;
-		case 10: // lifetime
+		case 9: // lifetime
 			return {
-				from: moment("2013-1-1").format("YYYY-MM-DD  HH:mm:ss"),
-				to: moment().format("YYYY-MM-DD  HH:mm:ss")
+				from: moment("2013-1-1").format(format),
+				to: moment().format(format)
 			};
+			break;
 		default:
 			break;
 
 	}
-	console.log('date requested');
-	console.log('from date: ' + fromDate);
-	console.log('to date: ' + toDate);
 	return {
 		from: fromDate,
 		to: toDate
 	};
-}
-
-
-function reviewFormSubmit(formData) {
-	console.log('in review form submit ...');
-	map.spin(true);
-	removeChoroplethLayers();
-	disableMapInteraction();
-	$.when(
-		ajaxSubmit(formData, 'review_interq_ukadminthree'),
-		ajaxSubmit(formData, 'review_interq_adminone'),
-		ajaxSubmit(formData, 'review_interq_world')
-	).done(function(a, b, c) {
-		ukAdminThree = getWmsTiles(a[0]);
-		adminOne = getWmsTiles(b[0]);
-		world = getWmsTiles(c[0]);
-		world.addTo(map);
-		layers.push(world);
-		layers.push(adminOne);
-		layers.push(ukAdminThree);
-		enableMapInteraction();
-		map.spin(false);
-	});
 }
 
 function getWmsTiles(data) {
@@ -143,8 +110,6 @@ function getWmsTiles(data) {
 	var second_q = data.second_q;
 	var third_q = data.third_q;
 	var geoserverLayer = data.geo_layer_name;
-	console.log(geoserverLayer);
-
 	return L.tileLayer.wms(geoserverUrl +
 		'?SERVICE=WMS&REQUEST=GetMap&env=first_q:' + first_q + ';second_q:' + second_q + ';third_q:' + third_q + ';&VERSION=1.1.0', {
 			layers: 'cite:' + geoserverLayer,
@@ -154,6 +119,25 @@ function getWmsTiles(data) {
 			tiled: true,
 			attribution: "myattribution",
 		});
+}
+
+function getAverageRating(formData, groupBy, model) {
+	return $.ajax({
+		type: 'GET',
+		url: $.ajaxSettings.url + "average_rating",
+		data: {
+			form: formData,
+			group: groupBy,
+			model: model
+		},
+		success: function(data) {
+			console.log('ajax success from: venues...');
+			console.log(data);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			console.log(textStatus, errorThrown);
+		}
+	})
 }
 
 function venuesFormSubmit(formData) {
@@ -174,81 +158,51 @@ function venuesFormSubmit(formData) {
 				console.log(textStatus, errorThrown);
 			}
 		}),
-		$.ajax({
-			type: 'GET',
-			url: $.ajaxSettings.url + "average_rating",
-			data: {
-				form: formData,
-				group: 'Venue.iso',
-				model: 'World'
-			},
-			success: function(data) {
-				console.log('ajax success from: venues...');
-				console.log(data);
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				console.log(textStatus, errorThrown);
-			}
-		}),
-		$.ajax({
-			type: 'GET',
-			url: $.ajaxSettings.url + "average_rating",
-			data: {
-				form: formData,
-				group: 'Venue.city',
-				model: 'AdminOne'
-			},
-		}),
-		$.ajax({
-			type: 'GET',
-			url: $.ajaxSettings.url + "average_rating",
-			data: {
-				form: formData,
-				group: 'Venue.address',
-				model: 'UkAdminThree'
-			},
-		}),
-		ajaxSubmit(formData, 'review_interq_ukadminthree'),
-		ajaxSubmit(formData, 'review_interq_adminone'),
-		ajaxSubmit(formData, 'review_interq_world')
-	).done(function(a, b, c, d,e,f,g) {
-		world = getWmsTiles(b[0]);
-		adminOne = getWmsTiles(c[0]);
-		ukAdminThree = getWmsTiles(d[0]);
-		var uk2 = getWmsTiles(e[0]);
-		var county2 = getWmsTiles(f[0]);
-		var world2 = getWmsTiles(g[0]);
-
+		//get the average ratings
+		getAverageRating(formData, 'Venue.iso', 'World'),
+		getAverageRating(formData, 'Venue.city', 'AdminOne'),
+		getAverageRating(formData, 'Venue.address', 'UkAdminThree'),
+		//get interquartile range
+		getInterquartiles(formData, 'review_interq_ukadminthree'),
+		getInterquartiles(formData, 'review_interq_adminone'),
+		getInterquartiles(formData, 'review_interq_world')
+	).done(function(a, b, c, d, e, f, g) {
+		worldRating = getWmsTiles(b[0]);
+		adminOneRating = getWmsTiles(c[0]);
+		ukAdminThreeRating = getWmsTiles(d[0]);
+		var ukInterQ = getWmsTiles(e[0]);
+		var adminOneInterQ = getWmsTiles(f[0]);
+		var worldInterQ = getWmsTiles(g[0]);
 
 		var overlays = [{
 			groupName: "Review count",
 			expanded: true,
 			layers: {
-				'country':uk2,
-				'county':county2,
-					'UK SOA':world2
+				'country': worldInterQ,
+				'county': adminOneInterQ,
+				'UK SOA': ukInterQ
 			}
-		},{
+		}, {
 			groupName: "Review rating",
 			expanded: true,
 			layers: {
-				"country": world,
-				"county": adminOne,
-				"UK SOA": ukAdminThree
+				"country": worldRating,
+				"county": adminOneRating,
+				"UK SOA": ukAdminThreeRating
 			}
 		}];
 
 		var options = {
-				container_width 	: "300px",
-				group_maxHeight     : "80px",
-				//container_maxHeight : "350px",
-				exclusive       	: false
-			};
+			container_width: "300px",
+			group_maxHeight: "80px",
+			//container_maxHeight : "350px",
+			exclusive: false
+		};
 		// Use the custom grouped layer control, not "L.control.layers"
 		var control = L.Control.styledLayerControl(null, overlays, options);
- 			map.addControl(control);
+		map.addControl(control);
 
-			map.spin(false);
+		map.spin(false);
 
 
 	});
@@ -261,9 +215,9 @@ function usersFormSubmit(formData) {
 	removeChoroplethLayers();
 	disableMapInteraction();
 	$.when(
-		ajaxSubmit(formData, 'users_interq_ukadminone'),
-		ajaxSubmit(formData, 'users_interq_adminone'),
-		ajaxSubmit(formData, 'users_interq_world')
+		getInterquartiles(formData, 'users_interq_ukadminone'),
+		getInterquartiles(formData, 'users_interq_adminone'),
+		getInterquartiles(formData, 'users_interq_world')
 	).done(function(a, b, c) {
 		ukAdminThree = getWmsTiles(a[0]);
 		adminOne = getWmsTiles(b[0]);
@@ -278,13 +232,14 @@ function usersFormSubmit(formData) {
 
 }
 
-function ajaxSubmit(formData, url) {
+
+function getInterquartiles(formData, url) {
 	return $.ajax({
 		type: 'GET',
 		url: $.ajaxSettings.url + url,
 		data: formData,
 		success: function(data) {
-			console.log('ajax success from: users...');
+			console.log('ajax success from: review...');
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			console.log(textStatus, errorThrown);
@@ -292,68 +247,15 @@ function ajaxSubmit(formData, url) {
 	})
 }
 
-function getGraphData(formData) {
-	console.log('getting graph data ...');
-	var endUrl = $(form).attr('action');
 
-	$(form).ajaxSubmit({
-		type: 'GET',
-		dataType: 'json',
-		url: getBaseURL() + 'feed_finder_transactions/' + endUrl,
-		data: formData,
-		success: function(data) {
-			console.log('recieved graph data');
-			drawGraph(data, 'review');
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			console.log(textStatus, errorThrown);
-		}
-
-	});
-
-}
-
-function drawGraph(data, seriesDescription) {
-	$('#graph-container').highcharts('StockChart', {
-
-		chart: {},
-
-		navigator: {
-			handles: {
-				backgroundColor: 'yellow',
-				borderColor: 'red'
-			}
-		},
-
-		rangeSelector: {
-			selected: 1
-		},
-
-		series: [{
-			name: seriesDescription,
-			data: data,
-			type: 'area',
-			fillColor: {
-				linearGradient: {
-					x1: 0,
-					y1: 0,
-					x2: 0,
-					y2: 1
-				},
-				stops: [
-					[0, Highcharts.getOptions().colors[0]],
-					[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-				]
-			}
-		}]
-	});
-}
 
 function drawMarkers(data) {
 	console.log('in drawing markers ...');
 	markers.clearLayers();
 	var title, marker;
-	console.log(markers);
+	var index = $(venueSelect).prop('selectedIndex');
+	var dateRange = getDateRange(index, "YYYY-MM-DD");
+	console.log(dateRange);
 	for (var i = 0; i < data.length; i++) {
 		venue = data[i]['Venue'];
 		review = data[i]['Review'];
@@ -362,7 +264,7 @@ function drawMarkers(data) {
 		lng = venue.lng
 		title = "	<div class='span4'>" +
 			'<h4>' + venue.name + '</h4>' +
-			'<a href=http://localhost/am-analytics/venues/'+venue.id+'>' + review.length + ' review(s)</a>' +
+			'<a target="_blank" href=http://localhost/am-analytics/venues?id=' + venue.id + '&from=' + dateRange.from + '&to=' + dateRange.to + '>' + review.length + ' review(s)</a>' +
 			'<address>' +
 			'<strong>' + venue.address + '</strong><br>' +
 			venue.city + '<br>' +
@@ -426,14 +328,8 @@ function drawMarkers(data) {
 		}
 
 	});
-
-	//stopped here!, trying to add the markers to the map
 	map.spin(false);
 
-}
-
-function onMarkerClick(e) {
-	alert('e.target._myId');
 }
 
 
