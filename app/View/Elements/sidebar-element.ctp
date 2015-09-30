@@ -17,11 +17,11 @@
 	<div class="sidebar-content">
 		<div class="sidebar-pane" id="home">
 			<h1 class="sidebar-header">
-				sidebar-v2
+				Search Control
 				<div class="sidebar-close"><i class="fa fa-caret-left"></i></div>
 			</h1>
 
-			<p>some info to teach how to use init :/</p>
+			<p>Here, you can search for the latest added venues, reviews and new user downloads of FeedFinder within a specific time frame.</p>
 		</div>
 
 		<div class="sidebar-pane" id="users">
@@ -30,17 +30,10 @@
 					<i class="fa fa-caret-left"></i>
 				</div>
 			</h1>
+			Search location with concentrated users
 			<?php echo $this->element('form-element');?>
 		</div>
 
-<!--
-				<div class="sidebar-pane" id="review">
-					<h1 class="sidebar-header">Review
-						<div class="sidebar-close">
-							<i class="fa fa-caret-left"></i>
-						</div>
-					</h1>
-				</div> -->
 
 				<div class="sidebar-pane" id="venues">
 					<h1 class="sidebar-header">Venues
@@ -48,6 +41,8 @@
 							<i class="fa fa-caret-left"></i>
 						</div>
 					</h1>
+					Search available feeding venues by the following
+					options
 					<?php echo $this->element('form-element');?>
 				</div>
 

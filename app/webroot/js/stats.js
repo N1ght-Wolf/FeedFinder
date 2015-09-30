@@ -1,43 +1,70 @@
 var form;
 var userSelect, venueSelect;
 var markers;
+var overlays, toggleControl,dateRange;
+var mapQuery = {
+	from: 0,
+	to: 0
+};
+
+var options = {
+	container_width: "300px",
+	group_maxHeight: "80px",
+	exclusive: false,
+	collapsed:false
+};
+
 $.ajaxSetup({
 	url: getBaseURL() + 'feed_finder_transactions/',
-	dataType: 'json'
 });
 
 $(document).ready(function() {
-	sidebar.open('home');
+	sidebar.open('venues');
 	markers = new L.MarkerClusterGroup();
 
 	form = $('.query-form');
 	userSelect = $(form).eq(0).find('select');
 	venueSelect = $(form).eq(1).find('select');
-
-
+	$(venueSelect).prop('selectedIndex', 6);
 	var selectors = [userSelect, venueSelect];
 	$(selectors).each(function() {
 		$(this).change(function() {
 			var position = $(this).prop('selectedIndex');
 			console.log(position);
-			var formData = getDateRange(position, "YYYY-MM-DD HH:mm:ss");
-			formPackage(formData);
+			dateRange = getDateRange(position, "YYYY-MM-DD HH:mm:ss");
+			mapQuery.from = dateRange.from;
+			mapQuery.to = dateRange.to;
+			submitMapQuery();
 		});
 	});
+	var position = $(venueSelect).prop('selectedIndex');
+	dateRange = getDateRange(position, "YYYY-MM-DD HH:mm:ss");
+	mapQuery.from = dateRange.from;
+	mapQuery.to = dateRange.to;
+	submitMapQuery();
 });
 
 
 
 
-function formPackage(formData) {
+function submitMapQuery() {
 	$('#' + sidebar.getActiveTab() + '-info').toggle();
+	console.log(currentOverlay);
 	switch (sidebar.getActiveTab()) {
 		case 'users':
-			url = 'get_stats_users'
-			usersFormSubmit(formData);
+			removeToggle();
+			usersFormSubmit();
+			markers.clearLayers();
+			if(map.hasLayer(currentOverlay)){
+				map.removeLayer(currentOverlay);
+			}
 			break;
 		case 'venues':
-			venuesFormSubmit(formData);
+			removeToggle();
+			venuesFormSubmit();
+			if(map.hasLayer(currentOverlay)){
+				map.removeLayer(currentOverlay);
+			}
 			break;
 		default:
 			//do nothing
@@ -105,50 +132,53 @@ function getDateRange(pos, format) {
 	};
 }
 
-function getWmsTiles(data) {
-	var first_q = data.first_q;
-	var second_q = data.second_q;
-	var third_q = data.third_q;
-	var geoserverLayer = data.geo_layer_name;
-	return L.tileLayer.wms(geoserverUrl +
-		'?SERVICE=WMS&REQUEST=GetMap&env=first_q:' + first_q + ';second_q:' + second_q + ';third_q:' + third_q + ';&VERSION=1.1.0', {
-			layers: 'cite:' + geoserverLayer,
-			format: 'image/png',
+function getWmsTilesInterq(wms) {
+	url = geoserverUrl;
+	url += '&env=first_q:' + wms[1] +
+		';second_q:' + wms[2] +
+		';third_q:' + wms[3] +
+		';fourth_q:' + wms[4] +
+		';fifth_q:' + wms[5];
+	console.log(url);
+	return L.tileLayer.betterWms(url, {
+			layers: 'cite:' + wms.geo_layer_name,
 			transparent: true,
-			version: '1.1.0',
-			tiled: true,
-			attribution: "myattribution",
+			format: 'image/png',
+			styles: wms.geo_layer_style
 		});
 }
 
-function getAverageRating(formData, groupBy, model) {
-	return $.ajax({
-		type: 'GET',
-		url: $.ajaxSettings.url + "average_rating",
-		data: {
-			form: formData,
-			group: groupBy,
-			model: model
-		},
-		success: function(data) {
-			console.log('ajax success from: venues...');
-			console.log(data);
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			console.log(textStatus, errorThrown);
-		}
-	})
+function getWmsTilesRatings(wms) {
+	return L.tileLayer.betterWms(geoserverUrl, {
+			layers: 'cite:' + wms.geo_layer_name,
+			transparent: true,
+			format: 'image/png',
+			styles: wms.geo_layer_style
+		});
 }
 
-function venuesFormSubmit(formData) {
+function getAverageRating(url) {
+	return $.ajax({
+		type: 'GET',
+		dataType: 'json',
+		url: $.ajaxSettings.url + url,
+		data: mapQuery,
+		error: function(jqXHR, textStatus, errorThrown) {
+			console.log(textStatus, errorThrown, jqXHR);
+		}
+	});
+}
+
+function venuesFormSubmit() {
 	$('#venue-info').toggle();
 	map.spin(true);
 	console.log('in venues form submit ...');
 	$.when(
 		$.ajax({
 			type: 'GET',
+			dataType: 'json',
 			url: $.ajaxSettings.url + "get_stats_venues",
-			data: formData,
+			data: mapQuery,
 			success: function(data) {
 				console.log('ajax success from: venues...');
 				console.log(data);
@@ -158,93 +188,93 @@ function venuesFormSubmit(formData) {
 				console.log(textStatus, errorThrown);
 			}
 		}),
-		//get the average ratings
-		getAverageRating(formData, 'Venue.iso', 'World'),
-		getAverageRating(formData, 'Venue.city', 'AdminOne'),
-		getAverageRating(formData, 'Venue.address', 'UkAdminThree'),
-		//get interquartile range
-		getInterquartiles(formData, 'review_interq_ukadminthree'),
-		getInterquartiles(formData, 'review_interq_adminone'),
-		getInterquartiles(formData, 'review_interq_world')
-	).done(function(a, b, c, d, e, f, g) {
-		worldRating = getWmsTiles(b[0]);
-		adminOneRating = getWmsTiles(c[0]);
-		ukAdminThreeRating = getWmsTiles(d[0]);
-		var ukInterQ = getWmsTiles(e[0]);
-		var adminOneInterQ = getWmsTiles(f[0]);
-		var worldInterQ = getWmsTiles(g[0]);
+		getAverageRating('average_rating_world'),
+		getAverageRating('average_rating_admin_one'),
+		getAverageRating('average_rating_uk')
 
-		var overlays = [{
-			groupName: "Review count",
-			expanded: true,
-			layers: {
-				'country': worldInterQ,
-				'county': adminOneInterQ,
-				'UK SOA': ukInterQ
-			}
-		}, {
-			groupName: "Review rating",
-			expanded: true,
-			layers: {
-				"country": worldRating,
-				"county": adminOneRating,
-				"UK SOA": ukAdminThreeRating
-			}
-		}];
+	).done(function(makers, avgRatingWorld, avgRatingAdminOne, avgRatingUk) {
+		$.when(
+			getInterquartiles('review_interq_ukadminthree'),
+			getInterquartiles('review_interq_adminone'),
+			getInterquartiles('review_interq_world')
+		).done(function(reviewCountUk, reviewCountAdminOne, reviewCountWorld) {
+			removeToggle();
 
-		var options = {
-			container_width: "300px",
-			group_maxHeight: "80px",
-			//container_maxHeight : "350px",
-			exclusive: false
-		};
-		// Use the custom grouped layer control, not "L.control.layers"
-		var control = L.Control.styledLayerControl(null, overlays, options);
-		map.addControl(control);
-
-		map.spin(false);
-
-
+			overlays = [{
+				groupName: "Review count",
+				expanded: true,
+				layers: {
+					'country': getWmsTilesInterq(reviewCountWorld[0]),
+					'county': getWmsTilesInterq(reviewCountAdminOne[0]),
+					'UK SOA': getWmsTilesInterq(reviewCountUk[0])
+				}
+			}, {
+				groupName: "Review rating",
+				expanded: true,
+				layers: {
+					"country": getWmsTilesRatings(avgRatingWorld[0]),
+					"county": getWmsTilesRatings(avgRatingAdminOne[0]),
+					"UK SOA": getWmsTilesRatings(avgRatingUk[0])
+				}
+			}];
+			toggleControl = L.Control.styledLayerControl(null, overlays, options);
+			map.addControl(toggleControl);
+			map.spin(false);
+		});
 	});
 
 }
 
-function usersFormSubmit(formData) {
+function usersFormSubmit() {
 	console.log('in users form submit ...');
 	map.spin(true);
-	removeChoroplethLayers();
 	disableMapInteraction();
 	$.when(
-		getInterquartiles(formData, 'users_interq_ukadminone'),
-		getInterquartiles(formData, 'users_interq_adminone'),
-		getInterquartiles(formData, 'users_interq_world')
-	).done(function(a, b, c) {
-		ukAdminThree = getWmsTiles(a[0]);
-		adminOne = getWmsTiles(b[0]);
-		world = getWmsTiles(c[0]);
-		world.addTo(map);
-		layers.push(world);
-		layers.push(adminOne);
-		layers.push(ukAdminThree);
+		getInterquartiles('users_interq_ukadminthree'),
+		getInterquartiles('users_interq_adminone'),
+		getInterquartiles('users_interq_world')
+	).done(function(uk, adminOne, world) {
+		removeToggle();
+		overlays = [{
+			groupName: "User count",
+			expanded: true,
+			layers: {
+				'country': getWmsTilesInterq(world[0]),
+				'county': getWmsTilesInterq(adminOne[0]),
+				'UK SOA': getWmsTilesInterq(uk[0])
+			}
+		}];
+		toggleControl = L.Control.styledLayerControl(null, overlays, options);
+		map.addControl(toggleControl);
+
 		enableMapInteraction();
 		map.spin(false);
 	});
-
 }
 
+function removeToggle() {
+	if (toggleControl != undefined) {
+		map.removeControl(toggleControl);
+		toggleControl.removeGroup('User count');
+		toggleControl = null;
+		overlays = null;
+	}
+}
 
-function getInterquartiles(formData, url) {
+function getInterquartiles(url) {
+	console.log($.ajaxSettings.url + url);
 	return $.ajax({
 		type: 'GET',
+		dataType: 'json',
 		url: $.ajaxSettings.url + url,
-		data: formData,
+		data: mapQuery,
 		success: function(data) {
 			console.log('ajax success from: review...');
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			console.log(textStatus, errorThrown);
 		}
-	})
+	});
 }
 
 
@@ -255,16 +285,17 @@ function drawMarkers(data) {
 	var title, marker;
 	var index = $(venueSelect).prop('selectedIndex');
 	var dateRange = getDateRange(index, "YYYY-MM-DD");
-	console.log(dateRange);
 	for (var i = 0; i < data.length; i++) {
 		venue = data[i]['Venue'];
 		review = data[i]['Review'];
 
 		lat = venue.lat;
 		lng = venue.lng
-		title = "	<div class='span4'>" +
+		title =
+			"<div class='span4'>" +
 			'<h4>' + venue.name + '</h4>' +
-			'<a target="_blank" href=http://localhost/am-analytics/venues?id=' + venue.id + '&from=' + dateRange.from + '&to=' + dateRange.to + '>' + review.length + ' review(s)</a>' +
+			'<a target="_blank" href=http://localhost/am-analytics/venues?id=' + venue.id +
+			'&from=' + dateRange.from + '&to=' + dateRange.to + '>' + review.length + ' review(s)</a>' +
 			'<address>' +
 			'<strong>' + venue.address + '</strong><br>' +
 			venue.city + '<br>' +
@@ -286,6 +317,28 @@ function drawMarkers(data) {
 	}
 
 	map.addLayer(markers);
+	markerClick();
+	clusterClick();
+
+	map.spin(false);
+
+}
+
+function clusterClick() {
+	markers.on('clusterclick', function(a) {
+		$('#venues-panel').empty();
+		console.log(a.layer.getAllChildMarkers());
+		var childMarkers = a.layer.getAllChildMarkers();
+		for (var i = 0; i < childMarkers.length; i++) {
+			var child = childMarkers[i];
+			// $('#venues-info').append(child.options.title);
+			console.log(a);
+		}
+
+	});
+}
+
+function markerClick() {
 	markers.on('click', function(a) {
 		$('#venue-info').empty();
 		var review = a.layer.options.review;
@@ -299,10 +352,8 @@ function drawMarkers(data) {
 			if (reviewText == null) {
 				reviewText = 'no comments was left';
 			}
-
 			var reviewHtml = "<p>" + reviewText + "</p>";
 			var createdHtml = "<p>" + review[i].created + "</p>";
-
 
 			console.log(title);
 			console.log(reviewHtml);
@@ -311,25 +362,9 @@ function drawMarkers(data) {
 			$('#venue-info').append(reviewHtml);
 			$('#venue-info').append(createdHtml);
 			$('#venue-info').append('<hr>');
-
-
-
 		}
 
 	});
-	markers.on('clusterclick', function(a) {
-		$('#venues-panel').empty();
-		console.log(a.layer.getAllChildMarkers());
-		var childMarkers = a.layer.getAllChildMarkers();
-		for (var i = 0; i < childMarkers.length; i++) {
-			var child = childMarkers[i];
-			// $('#venues-info').append(child.options.title);
-			console.log(a);
-		}
-
-	});
-	map.spin(false);
-
 }
 
 

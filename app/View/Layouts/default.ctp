@@ -26,18 +26,23 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 		<!-- <link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' /> -->
 		<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 		<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
-			<script src="https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js"></script>
+		<script src="https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js"></script>
 			<!-- <script src="https://rawgit.com/vogdb/Leaflet.ActiveLayers/master/dist/leaflet.active-layers.min.js"></script> -->
-			<script src="https://rawgit.com/davicustodio/Leaflet.StyledLayerControl/master/src/styledLayerControl.js"></script>
 
-		<script type="text/javascript" src='https://rawgit.com/moment/moment/develop/moment.js'></script>
-		<script type="text/javascript" src='https://rawgit.com/moment/moment/master/locale/en-gb.js'></script>
-		<script type="text/javascript" src='https://rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/js/bootstrap-datetimepicker.min.js'></script>
-		<script src="http://malsup.github.com/jquery.form.js"></script>
-		<script src="https://rawgit.com/makinacorpus/Leaflet.Spin/master/leaflet.spin.js"></script>
-		<script src="https://rawgit.com/dreyescat/bootstrap-rating/master/bootstrap-rating.min.js"></script>
+		<!-- <script type="text/javascript" src='https://rawgit.com/moment/moment/develop/moment.js'></script> -->
+		<!-- <script type="text/javascript" src='https://rawgit.com/moment/moment/master/locale/en-gb.js'></script> -->
+		<!-- <script type="text/javascript" src='https://rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/js/bootstrap-datetimepicker.min.js'></script> -->
+		<!-- <script src="http://malsup.github.com/jquery.form.js"></script> -->
+		<!-- <script src="https://rawgit.com/makinacorpus/Leaflet.Spin/master/leaflet.spin.js"></script> -->
+		<!-- <script src="https://rawgit.com/dreyescat/bootstrap-rating/master/bootstrap-rating.min.js"></script> -->
 		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-		<script src="//rawgit.com/botmonster/jquery-bootpag/master/lib/jquery.bootpag.min.js"></script>
+		<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.2/js/bootstrapValidator.min.js'></script>
+
+		<!-- <script src="//rawgit.com/botmonster/jquery-bootpag/master/lib/jquery.bootpag.min.js"></script> -->
+
+		<?php
+
+         ?>
 
 
 
@@ -46,9 +51,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
 
 
-
-
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 		<link href="https://rawgit.com/Leaflet/Leaflet.markercluster/master/dist/MarkerCluster.css" rel="stylesheet">
 		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
 		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"/>
@@ -65,25 +68,26 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
           echo $this->fetch('css');
           echo $this->fetch('script');
 
-  				echo $this->Html->meta('icon');
-					echo $this->Html->script('jquery-ui');
+                echo $this->Html->meta('icon');
+                    echo $this->Html->script('jquery-ui');
 
-					echo $this->Html->script('leaflet-map');
-					echo $this->Html->script('leaflet-sidebar');
-					echo $this->Html->script('Control.Geocoder');
-					echo $this->Html->script('highstock');
-					echo $this->Html->script('spin.min');
-					echo $this->Html->script('url.min');
+                    echo $this->Html->script('leaflet-map');
+                    echo $this->Html->script('contact');
+                    // echo $this->Html->script('leaflet-sidebar');
+                    // echo $this->Html->script('Control.Geocoder');
+                    // echo $this->Html->script('highstock');
+                    echo $this->Html->script('url.min');
+                    // echo $this->Html->script('Control.Loading');
 
-					echo $this->Html->script('Control.Loading');
+                    echo $this->Html->css('main');
+                    echo $this->Html->css('jquery-ui');
+                    echo $this->Html->css('bootstrap.min');
 
-					echo $this->Html->css('main');
-					echo $this->Html->css('jquery-ui');
-					echo $this->Html->css('leaflet-sidebar');
-					echo $this->Html->css('bootstrap.min');
-					echo $this->Html->css('Control.Geocoder');
-					echo $this->Html->css('Control.Loading');
-					echo $this->Html->script('stats'); ?>
+                    echo $this->Html->css('Control.Loading');
+                    // echo $this->Html->script('stats');
+										echo $this->Html->css('contact', array('inline' => false));
+?>
+
 
 	<title>
 		<?php echo $cakeDescription ?>:
@@ -93,10 +97,12 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
 </head>
 <body>
-	<?php echo $this->element('navbar');
-	?>
-	<div id="container-fluid" class="content">
-			<?php echo $this->fetch('content'); ?>
+<?php echo $this->element('navbar');?>
+
+	<div id='main-container'class="content container-fluid">
+		<?php
+        echo $this->fetch('content');
+			?>
 		<div id="footer">
 
 		</div>

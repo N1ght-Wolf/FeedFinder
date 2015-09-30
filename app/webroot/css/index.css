@@ -1,0 +1,25 @@
+.page1{
+  background-color: #52B3D9;
+}
+.page2{
+  background-color: #34495e;
+}
+.main section.page1 .page_container {
+    position: absolute;
+    bottom: 0;
+    margin-left: -325px;
+    left: 50%;
+    margin-bottom: 50px;
+    max-width: 650px;
+}
+.main section.page2 .page_container {
+    position: absolute;
+    bottom: 0;
+    margin-left: -325px;
+    left: 50%;
+    margin-bottom: 100px;
+    max-width: 650px;
+}
+.white-text{
+  color: white;
+}

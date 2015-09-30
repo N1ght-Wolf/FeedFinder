@@ -12,87 +12,96 @@ class UkAdminThree extends Model
 {
     public $useDbConfig = 'postgresql';
 
-    public function updateReview($results)
-    {
-        $this->updateAll(array('UkAdminThree.review' => 0));
 
+
+    public function getInterquatileUser()
+    {
+        $results = $this->find('all', array(
+        'fields' => array('UkAdminThree.users', 'ntile(5) over (order by "users") as quartile'),
+        'group' => 'UkAdminThree.users',
+        'order' => 'UkAdminThree.users DESC',
+      ));
+        $quartile = array();
         foreach ($results as $result => $value) {
-            $lat = $value['Venue']['lat'];
-            $lng = $value['Venue']['lng'];
-            $count = $value[0]['mycount'];
-            $ans = $this->find('first',
-       array('conditions' => array("st_contains(UkAdminThree.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-            if(count($ans) > 0){
-              $this->id = $ans['UkAdminThree']['id'];
-              $this->saveField('review', $this->field('review') + $count);
+            $q = $value[0]['quartile'];
+            if (!array_key_exists($q, $quartile)) {
+                $quartile[$q] = $value['UkAdminThree']['users'];
             }
-
         }
+        $quartile['geo_layer_name'] = 'uk_admin_threes';
+        $quartile['geo_layer_style']='venue_sld_style';
 
-     return $this->getInterquatile('review');
-    //return $arrayName = array('a' => 'a');
+        return $quartile;
     }
 
-    public function getInterquatile($column)
+    public function getInterquatileReview()
     {
-        $results = $this->find('all', array('order' => array("UkAdminThree.$column ASC"),
-                                          'fields' => array("UkAdminThree.$column"),
-                                          'conditions' => array("UkAdminThree.$column > 0"), ));
-        $vals = array();
-        foreach ($results as $key => $value) {
-            $vals[] = $value['UkAdminThree']["$column"];
+        $results = $this->find('all', array(
+        'fields' => array('UkAdminThree.review', 'ntile(5) over (order by "review") as quartile'),
+        'group' => 'UkAdminThree.review',
+        'order' => 'UkAdminThree.review DESC',
+      ));
+        $quartile = array();
+        foreach ($results as $result => $value) {
+            $q = $value[0]['quartile'];
+            if (!array_key_exists($q, $quartile)) {
+                $quartile[$q] = $value['UkAdminThree']['review'];
+            }
         }
-        $count = count($results);
+        $quartile['geo_layer_name'] = 'uk_admin_threes';
+        $quartile['geo_layer_style']='review_sld_style';
 
-        $first = round(.25 * ($count + 1)) - 1;
-        $second = round($count / 2);
-        $third = round(.75 * ($count + 1)) - 1;
-
-        $quartiles = array('first_q' => floatval($vals[$first]),
-                       'second_q' => floatval($vals[$second]),
-                       'third_q' => floatval($vals[$third]),
-                       'geo_layer_name'=>'uk_admin_threes',
-                       'results' => $vals[$count - 1]);
-
-        return $quartiles;
+        return $quartile;
     }
 
-    public function updateUserCount($data){
-      $this->updateAll(array('UkAdminThree.users' => 0));
-
-      foreach ($data as $d => $value) {
-
-        $lat = $value['lat'];
-        $lng = $value['lng'];
-
-        $ans = $this->find('first',
-         array('conditions' => array("st_contains(UkAdminThree.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-            if(!empty($ans)){
-              $this->id = $ans['UkAdminThree']['id'];
-              $this->saveField('users', $this->field('users') + 1);
+    public function updateUserCount($data)
+    {
+        $saveMany = array();
+        $this->updateAll(array('UkAdminThree.users' => 0));
+        foreach ($data as $d => $value) {
+            $user_count = $value[0]['user_count'];
+            $postgre_uk_id = $value['Venue']['postgre_uk_id'];
+            if (isset($user_count) && isset($postgre_uk_id)) {
+                $saveMany[] = array('UkAdminThree' => array('id' => $postgre_uk_id,'users' => $user_count));
             }
-      }
-      return $this->getInterquatile('users');
+        }
+        $this->saveMany($saveMany);
+        return $this->getInterquatileUser();
     }
 
-    public function updateVenueRating($data){
-      $this->updateAll(array('UkAdminThree.venues' => 0),array('UkAdminThree.review' => 0));
-      $arrayName = array();
-
+    public function updateVenueRating($data)
+    {
+        $saveMany = array();
+        $this->updateAll(array('UkAdminThree.venues' => 0));
       foreach ($data as $d => $value) {
-        $lat = $value['lat'];
-        $lng = $value['lng'];
-        $rating = $value['avg'];
-        $count = $value['venue_count'];
+          $avg_rating = $value['0']['avg_rating'];
+          $postgre_uk_id = $value['Venue']['postgre_uk_id'];
 
-        $ans = $this->find('first',
-         array('conditions' => array("st_contains(UkAdminThree.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-            if(!empty($ans)){
-              $this->id = $ans['UkAdminThree']['id'];
-              $this->saveField('venues', $rating);
-              $this->saveField('review', $this->field('review') + $count);
-            }
+          if (isset($avg_rating) && isset($postgre_uk_id)) {
+              $saveMany[] = array('UkAdminThree' => array('id' => $postgre_uk_id,'venues' => $avg_rating));
+          }
       }
-      return $this->getInterquatile('venues');
+
+      $this->saveMany($saveMany);
+      $wms_details = array();
+      $wms_details['geo_layer_name']='uk_admin_threes';
+      $wms_details['geo_layer_style']='venue_sld_style';
+      return $wms_details;
     }
+
+    public function updateReview($data)
+    {
+        $saveMany = array();
+        $this->updateAll(array('UkAdminThree.review' => 0));
+        foreach ($data as $d => $value) {
+            $review_count = $value[0]['review_count'];
+            $postgre_uk_id = $value['Venue']['postgre_uk_id'];
+            if (isset($review_count) && isset($postgre_uk_id)) {
+                $saveMany[] = array('UkAdminThree' => array('id' => $postgre_uk_id,'review' => $review_count));
+            }
+        }
+        $this->saveMany($saveMany);
+        return $this->getInterquatileReview();
+    }
+
 }

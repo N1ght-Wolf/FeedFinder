@@ -16,27 +16,22 @@ class User extends Model {
   var $hasMany = 'Review';
 
 
-  public function getUserBaseLocation($data){
+  public function getUserFirstLocation($data){
     $from = $data['from'];
     $to = $data['to'];
 
     $conditions = array('User.created >=' => $from,
                         'User.created <=' => $to);
+    $fields = array('Review.venue_id','MIN(Review.created)');
+    $group = array('Review.user_id');
 
     $results = $this->find('all', array(
-      'conditions'=>$conditions
+      'conditions'=>$conditions,
+      'fields'=>$fields,
+      'group'=>$group
     ));
 
-    $reviewArray;
-    $venueIdArray = array();
-    foreach ($results as $result => $value) {
-      $reviewArray = $value['Review'];
-      if(!empty($reviewArray))
-      {
-        $venueIdArray[]= $reviewArray[0]['venue_id'];
-      }
-    }
-    return $venueIdArray;
+    return $result;
   }
 
 

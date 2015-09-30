@@ -1,4 +1,5 @@
 <?php
+
 App::uses('Model', 'Model');
 
 /**
@@ -6,94 +7,99 @@ App::uses('Model', 'Model');
  *
  * Add your application-wide methods in the class below, your models
  * will inherit them.
- *
- * @package       app.Model
  */
-class AdminOne extends Model {
-  public $useDbConfig = 'postgresql';
+class AdminOne extends Model
+{
+    public $useDbConfig = 'postgresql';
 
-  public function updateReview($results)
-  {
+
+    public function getInterquatileUser(){
+      $results = $this->find('all',array(
+        'fields'=>array('AdminOne.users', 'ntile(5) over (order by "users") as quartile'),
+        'group'=>'AdminOne.users',
+        'order'=>'AdminOne.users DESC'
+      ));
+    $quartile = array();
+    foreach ($results as $result => $value) {
+      $q = $value[0]['quartile'];
+        if(!array_key_exists($q,$quartile)){
+          $quartile[$q]=$value['AdminOne']['users'];
+        }
+    }
+      $quartile['geo_layer_name']='admin_ones';
+      $quartile['geo_layer_style']='venue_sld_style';
+      return $quartile;
+    }
+    public function getInterquatileReview(){
+      $results = $this->find('all',array(
+        'fields'=>array('AdminOne.review', 'ntile(5) over (order by "review") as quartile'),
+        'group'=>'AdminOne.review',
+        'order'=>'AdminOne.review DESC'
+      ));
+    $quartile = array();
+    foreach ($results as $result => $value) {
+      $q = $value[0]['quartile'];
+        if(!array_key_exists($q,$quartile)){
+          $quartile[$q]=$value['AdminOne']['review'];
+        }
+    }
+      $quartile['geo_layer_name']='admin_ones';
+      $quartile['geo_layer_style']='review_sld_style';
+
+      return $quartile;
+    }
+
+    public function updateUserCount($data)
+    {
+      $saveMany = array();
+
+        $this->updateAll(array('AdminOne.users' => 0));
+        foreach ($data as $d => $value) {
+            $user_count = $value[0]['user_count'];
+            $postgre_admin_one_id = $value['Venue']['postgre_admin_one_id'];
+            if(isset($user_count) && isset($postgre_admin_one_id)){
+              $saveMany[]=array('AdminOne'=>array('id'=>$postgre_admin_one_id,'users'=>$user_count));
+            }
+        }
+        $this->saveMany($saveMany);
+        return $this->getInterquatileUser();
+    }
+
+
+    public function updateVenueRating($data){
+      $saveMany = array();
+      $this->updateAll(array('AdminOne.venues' => 0));
+      foreach ($data as $d => $value) {
+          $avg_rating = $value['0']['avg_rating'];
+          $postgre_admin_one_id = $value['Venue']['postgre_admin_one_id'];
+
+          if(isset($avg_rating) && isset($postgre_admin_one_id))
+          {
+            $saveMany[]=array('AdminOne'=>array('id'=>$postgre_admin_one_id,'venues'=>$avg_rating));
+          }
+      }
+
+      $this->saveMany($saveMany);
+      $wms_details = array();
+      $wms_details['geo_layer_name']='admin_ones';
+      $wms_details['geo_layer_style']='venue_sld_style';
+      return $wms_details;
+    }
+
+    public function updateReview($data)
+    {
+      $saveMany = array();
       $this->updateAll(array('AdminOne.review' => 0));
-
-      foreach ($results as $result => $value) {
-          $lat = $value['Venue']['lat'];
-          $lng = $value['Venue']['lng'];
-          $count = $value[0]['mycount'];
-          $ans = $this->find('first',
-     array('conditions' => array("st_contains(AdminOne.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-          if(count($ans) > 0){
-            $this->id = $ans['AdminOne']['id'];
-            $this->saveField('review', $this->field('review') + $count);
+      foreach ($data as $d => $value) {
+          $review_count = $value[0]['review_count'];
+          $postgre_admin_one_id = $value['Venue']['postgre_admin_one_id'];
+          if(isset($review_count) && isset($postgre_admin_one_id))
+          {
+            $saveMany[]=array('AdminOne'=>array('id'=>$postgre_admin_one_id,'review'=>$review_count));
           }
-
       }
-
-   return $this->getInterquatile('review');
-  //return $arrayName = array('a' => 'a');
-  }
-
-  public function getInterquatile($column)
-  {
-      $results = $this->find('all', array('order' => array("AdminOne.$column ASC"),
-                                        'fields' => array("AdminOne.$column"),
-                                        'conditions' => array("AdminOne.$column > 0"), ));
-
-      $vals = array();
-      foreach ($results as $key => $value) {
-          $vals[] = $value['AdminOne']["$column"];
-      }
-      $count = count($results);
-
-      $first = round(.25 * ($count + 1)) - 1;
-      $second = round($count / 2);
-      $third = round(.75 * ($count + 1)) - 1;
-
-      $quartiles = array('first_q' => floatval($vals[$first]),
-                     'second_q' => floatval($vals[$second]),
-                     'third_q' => floatval($vals[$third]),
-                     'geo_layer_name'=>'admin_ones',
-                     'results' => $vals[$count - 1], );
-
-      return $quartiles;
-  }
-  public function updateUserCount($data){
-    $this->updateAll(array('AdminOne.users' => 0));
-
-    foreach ($data as $d => $value) {
-
-      $lat = $value['lat'];
-      $lng = $value['lng'];
-
-      $ans = $this->find('first',
-       array('conditions' => array("st_contains(AdminOne.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-          if(!empty($ans)){
-            $this->id = $ans['AdminOne']['id'];
-            $this->saveField('users', $this->field('users') + 1);
-          }
+      $this->saveMany($saveMany);
+      return $this->getInterquatileReview();
     }
-    return $this->getInterquatile('users');
-  }
 
-  public function updateVenueRating($data){
-    $this->updateAll(array('AdminOne.venues' => 0),array('AdminOne.review' => 0));
-    $arrayName = array();
-
-    foreach ($data as $d => $value) {
-      $lat = $value['lat'];
-      $lng = $value['lng'];
-      $rating = $value['avg'];
-      $count = $value['venue_count'];
-      $ans = $this->find('first',
-       array('conditions' => array("st_contains(AdminOne.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-          if(!empty($ans)){
-            $this->id = $ans['AdminOne']['id'];
-            $this->saveField('venues', $rating);
-            $this->saveField('review', $this->field('review') + $count);
-          }
-    }
-    return $this->getInterquatile('venues');
-  }
 }
-
-?>

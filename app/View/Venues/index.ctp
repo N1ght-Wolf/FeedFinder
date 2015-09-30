@@ -1,3 +1,11 @@
+<?php
+echo $this->Html->script('bootstrap-rating.min',array('inline' => false));
+echo $this->Html->script('jquery.bootpag.min',array('inline' => false));
+echo $this->Html->script('moment',array('inline' => false));
+echo $this->Html->script('en-gb',array('inline' => false));
+
+
+ ?>
 <div class="container">
 	<?php
 	// print_r( $venue_rating[0]['average_rating']);
@@ -28,38 +36,39 @@
 			<div class="col-sm-4 col2">
 
 				<h3>Parent ratings</h3>
-				<a data-star ='5' href='#'>Excellent</a>
+				<a data-star ='5' href='#' id='#excellent-link' class = 'performance-review-link'>Excellent</a>			<i id='filter-icon'class="fa fa-times-circle " style="color:red; display:none;" ></i>
+
 				<div class="progress">
   <div id='excellent-progbar'class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-    60%
+
   </div>
 </div>
 
-				<a data-star ='4' href="#">Very Good</a>
+				<a data-star ='4' href="#" id='#vgood-link' class = 'performance-review-link'>Very Good</a>
 				<div class="progress">
 	  <div id='vgood-progbar' class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-	    60%
+
 	  </div>
 	</div>
 
-				<a data-star ='3' href="#">Average</a>
+				<a data-star ='3' href="#" id='average-link'class = 'performance-review-link'>Average</a>
 				<div class="progress">
   <div id='average-progbar' class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-    60%
+
   </div>
 </div>
-				<a data-star ='2' href="#">Poor</a>
+				<a data-star ='2' href="#" id='poor-link' class = 'performance-review-link'>Poor</a>
 
 				<div class="progress">
   <div id='poor-progbar' class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-    60%
+
   </div>
 </div>
 
-				<a data-star ='1' href="#">Terrible</a>
+				<a data-star ='1' href="#"id='terrible-link'class = 'performance-review-link'>Terrible</a>
 				<div class="progress">
   <div id='terrible-progbar' class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-    60%
+
   </div>
 </div>
 
@@ -69,12 +78,20 @@
 					<h3>Rating summary</h3>
 				</div>
 				<div class="">
-					Cleanliness
+					Comfort
 					<br>
-					<input id='cleanliness-rating'type="hidden" class="rating" value=value='0'/>
+					<input id='comfort-rating'type="hidden" class="rating" value=value='0'/>
 				</div>
 				<br>
-				<div id='privacy' class="">
+				<div  class="">
+					Cleanliness
+					<br>
+
+					<input id='cleanliness-rating' type="hidden" class="rating" value=value='0'/>
+				</div>
+				<br>
+
+				<div  class="">
 					Privacy
 					<br>
 
@@ -82,24 +99,23 @@
 				</div>
 				<br>
 
-				<div id='rooms' class="">
-					Rooms
+				<div  class="">
+					Baby facilities
 					<br>
 
-					<input id='rooms-rating' type="hidden" class="rating" value=value='0'/>
+					<input id='baby-fac-rating'type="hidden" class="rating" value='0'/>
 				</div>
-				<br>
-
-				<div id='location' class="">
-					Location
+				<div  class="">
+					Average spend
 					<br>
 
-					<input id='location-rating'type="hidden" class="rating" value='0'/>
+					<input id='average-spend-rating'type="hidden" class="rating" value='0'/>
 				</div>
 
 			</div>
 		</div>
 		<div class="row">
+
 			<div class="col-lg-10">
 				<form id='comment-form' class="form-inline pull-right" role="form">
 					<div class="form-group">
@@ -131,6 +147,7 @@
 					</div>
 				</form>
 				<h3 class="" id='review-count'>
+					23 reviews
 				</h3>
 				<hr>
 				<div>
@@ -139,7 +156,12 @@
 
 
 					</section>
-					<div class="alert alert-info" id='no-reviews' style='display:none' role="alert">Unfortunately there has been no review left at this venue</div>
+					<div class="alert alert-info" id='no-reviews' style='display:none' role="alert">
+						Unfortunately there has been no review left.
+						Toggle the search drop down to adjust your search <br>OR
+						click the 	<i class="fa fa-times-circle " style="color:red;" ></i>
+						to remove filter.
+					</div>
 
 					<div>
 					</div>

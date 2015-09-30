@@ -18,7 +18,7 @@ class Venue extends Model
     {
         $from = $data['from'];
         $to = $data['to'];
-        $group = array('Venue.iso');
+        $group = array('Venue.postgre_world_id');
         $conditions = array('Venue.show_on_map' => 1,
                         'Venue.created >=' => $from,
                         'Venue.created <=' => $to,
@@ -45,6 +45,7 @@ class Venue extends Model
       }
         return $latlng;
     }
+
 
 
 

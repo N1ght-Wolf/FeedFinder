@@ -2,6 +2,7 @@
 
 App::uses('AppController', 'Controller');
 App::uses('CakeTime', 'Utility');
+App::uses('CakeEmail', 'Network/Email');
 App::import('vendor', 'geoPHP/geoPHP.inc');
 
 /**
@@ -20,25 +21,40 @@ class FeedFinderTransactionsController extends AppController
 
     public function index()
     {
-        // ini_set('memory_limit', '2048M');
-        // ini_set('max_execution_time', 300);
     }
 
     public function stats()
     {
     }
 
+    public function about()
+    {
+    }
+    public function contact()
+    {
+    }
+
+    public function send_email()
+    {
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) {
+            $Email = new CakeEmail('gmail');
+                          $Email->to('feedfinder2013@gmail.com');
+                          $Email->subject('Automagically generated email');
+                          $Email->replyTo('the_mail_you_want_to_receive_replies@yourdomain.com');
+                          $Email->from ($this->request->data('email'));
+                          $Email->message($this->request->data('Message'));
+                          $Email->send();
+        }
+    }
+
     public function review_interq_ukadminthree()
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            $results = $this->Review->getReviewByAddress($this->request->query);
-            if (count($results) > 0) {
-                $quartiles = $this->UkAdminThree->updateReview($results);
-                echo json_encode($quartiles);
-            } else {
-                echo 'no result brah ...';
-            }
+            $results = $this->Review->getReviewUk($this->request->query);
+            $quartiles = $this->UkAdminThree->updateReview($results);
+            echo json_encode($quartiles);
         }
     }
 
@@ -46,13 +62,9 @@ class FeedFinderTransactionsController extends AppController
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            $results = $this->Review->getReviewByCity($this->request->query);
-            if (count($results) > 0) {
-                $quartiles = $this->AdminOne->updateReview($results);
-                echo json_encode($quartiles);
-            } else {
-                echo 'no result brah ...';
-            }
+            $results = $this->Review->getReviewAdminOne($this->request->query);
+            $quartiles = $this->AdminOne->updateReview($results);
+            echo json_encode($quartiles);
         }
     }
 
@@ -60,14 +72,9 @@ class FeedFinderTransactionsController extends AppController
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            $results = $this->Review->getReviewByCountry($this->request->query);
-          //$this->_print_array($results);
-          if (count($results) > 0) {
-              $quartiles = $this->World->updateReview($results);
-              echo json_encode($quartiles);
-          } else {
-              echo 'no result brah ...';
-          }
+            $results = $this->Review->getReviewWorld($this->request->query);
+            $quartiles = $this->World->updateReview($results);
+            echo json_encode($quartiles);
         }
     }
 
@@ -80,32 +87,36 @@ class FeedFinderTransactionsController extends AppController
         }
     }
 
-    public function average_rating()
+    public function average_rating_world()
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            // print_r($this->request->query);
             $data = $this->request->query;
-            $results = $this->Review->getVenueRating($data);
-            $arrayName = array();
-            switch ($data['model']) {
-            case 'World':
-              $inter_q_world = $this->World->updateVenueRating($results);
-              echo json_encode($inter_q_world);
+            $venue_ratings = $this->Review->getVenueRatingWorld($data);
+            $wms_details = $this->World->updateVenueRating($venue_ratings);
+            echo json_encode($wms_details);
+        }
+    }
 
-              break;
-            case 'AdminOne':
-              $inter_q_adminone = $this->AdminOne->updateVenueRating($results);
-              echo json_encode($inter_q_adminone);
-              break;
-            case 'UkAdminThree':
-              $inter_q_uk = $this->UkAdminThree->updateVenueRating($results);
-              echo json_encode($inter_q_uk);
-              break;
-            default:
-              # code...
-              break;
-          }
+    public function average_rating_admin_one()
+    {
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) {
+            $data = $this->request->query;
+            $venue_ratings = $this->Review->getVenueRatingAdminOne($data);
+            $wms_details = $this->AdminOne->updateVenueRating($venue_ratings);
+            echo json_encode($wms_details);
+        }
+    }
+
+    public function average_rating_uk()
+    {
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) {
+            $data = $this->request->query;
+            $venue_ratings = $this->Review->getVenueRatingUk($data);
+            $wms_details = $this->UkAdminThree->updateVenueRating($venue_ratings);
+            echo json_encode($wms_details);
         }
     }
 
@@ -113,81 +124,61 @@ class FeedFinderTransactionsController extends AppController
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            $results = $this->User->getUserBaseLocation($this->request->query);
-            if(!empty($results)){
-            $latlng = $this->Venue->getLatLng($results);
-            $quartiles = $this->World->updateUserCount($latlng);
-            echo json_encode($quartiles);
-          }else{
-            $quartiles = array('first_q'=>0,'second_q'=>0,'third_q'=>0, 'geo_layer_name'=>'admin_ones','results'=>0);
-            echo json_encode($quartiles);
+            $group = array('Venue.postgre_world_id');
+            $fields = array(
+          'COUNT(Venue.postgre_world_id) as user_count',
+          'MIN(Review.created)',
+          'Venue.postgre_world_id',
+          'Review.user_id', );
 
-          }
+            $results = $this->Review->getUsersFirstLocation(
+          $this->request->query,
+          $group,
+          $fields
+        );
+            $quartiles = $this->World->updateUserCount($results);
+            echo json_encode($quartiles);
         }
     }
     public function users_interq_adminone()
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            $results = $this->User->getUserBaseLocation($this->request->query);
-            if(!empty($results)){
-              $latlng = $this->Venue->getLatLng($results);
-              $quartiles = $this->AdminOne->updateUserCount($latlng);
-              echo json_encode($quartiles);
-            }else{
-              $quartiles = array('first_q'=>0,'second_q'=>0,'third_q'=>0, 'geo_layer_name'=>'admin_ones','results'=>0);
-              echo json_encode($quartiles);
+            $group = array('Venue.postgre_admin_one_id');
+            $fields = array(
+            'COUNT(Venue.postgre_admin_one_id) as user_count',
+            'MIN(Review.created)',
+            'Venue.postgre_admin_one_id',
+            'Review.user_id', );
 
-            }
-
-        }
-    }
-    public function users_interq_ukadminone()
-    {
-        $this->autoRender = false;
-        if ($this->request->is('ajax')) {
-            $results = $this->User->getUserBaseLocation($this->request->query);
-            if(!empty($results)){
-            $latlng = $this->Venue->getLatLng($results);
-            $quartiles = $this->UkAdminThree->updateUserCount($latlng);
+            $results = $this->Review->getUsersFirstLocation(
+          $this->request->query,
+          $group,
+          $fields
+        );
+            $quartiles = $this->AdminOne->updateUserCount($results);
             echo json_encode($quartiles);
-          }else{
-            $quartiles = array('first_q'=>0,'second_q'=>0,'third_q'=>0, 'geo_layer_name'=>'admin_ones','results'=>0);
+        }
+    }
+    public function users_interq_ukadminthree()
+    {
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) {
+            $group = array('Venue.postgre_uk_id');
+            $fields = array(
+              'COUNT(Venue.postgre_uk_id) as user_count',
+              'MIN(Review.created)',
+              'Venue.postgre_uk_id',
+              'Review.user_id', );
+
+            $results = $this->Review->getUsersFirstLocation(
+          $this->request->query,
+          $group,
+          $fields
+          );
+
+            $quartiles = $this->UkAdminThree->updateUserCount($results);
             echo json_encode($quartiles);
-
-          }
         }
-    }
-
-    public function getVenueByCountry()
-    {
-        $this->autoRender = false;
-
-        if ($this->request->is('ajax')) {
-            $results = $this->Venue->getVenueByIso($this->request->data);
-
-            echo json_encode($results);
-        }
-    }
-
-    public function totalUsers()
-    {
-        $this->autoRender = false;
-
-        if ($this->request->is('ajax')) {
-            $results = array();
-            $results['total_users'] = $this->User->getTotalUsers($this->request->query);
-            $ans = $this->User->getActiveUsers($this->request->query);
-            $results['active_users'] = intval($ans[0][0]['activeUsers']);
-
-            echo json_encode($results);
-        }
-    }
-
-    public function _print_array($array)
-    {
-        echo '<pre>';
-        print_r($array);
-        echo '</pre>';
     }
 }

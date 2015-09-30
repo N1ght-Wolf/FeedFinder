@@ -1,22 +1,9 @@
-var map, world, adminOne, ukAdminThree;
-var layers = [];
-var simpCounter = 0;
-var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms';
+var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms?';
 var mapToken = 'pk.eyJ1IjoiZmVlZC1maW5kZXIiLCJhIjoiMDIyMGI4ZmU4ZmFlYTMxMDFlMjYyZmJmNzQ5OWJhOGEifQ.6cOhRAs3U0blI_n-cJxD0g';
 var sidebar;
-var customMarker;
-var allowToZoom = true;
-var reviewRating;
-var reviewCount;
+var uri;
+var legend,currentOverlay;
 $(document).ready(function() {
-	reviewRating = new L.LayerGroup();
-	reviewCount = new L.LayerGroup();
-
-
-	 L.marker([39.61, -105.02]).bindPopup('Littleton, CO.').addTo(reviewRating);
-	 L.marker([39.74, -104.99]).bindPopup('Denver, CO.').addTo(reviewRating);
-	 L.marker([39.73, -104.8]).bindPopup('Aurora, CO.').addTo(reviewRating);
-	 L.marker([39.77, -105.23]).bindPopup('Golden, CO.').addTo(reviewRating);
 
  	var street =	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -28,17 +15,21 @@ $(document).ready(function() {
 	map = L.map('map',{
       center: [51.505, -0.09],
       zoom: 5,
-      layers: [street, reviewRating]
+      layers: [street]
     });
-    // // Make the "Landmarks" group exclusive (use radio inputs)
 
+	map.on('layeradd', overlayAdd);
+	map.on('overlayadd', overlayAdd);
+	map.on('overlayremove',overlayRemove);
+	var lc = L.control.locate({
+		position:'topright',
+		 icon: 'fa fa-location-arrow',
+       locateOptions: {
+               maxZoom:15
+}}).addTo(map);
 
-		map.on('overlayadd', onOverlayAdd);
+//lc.start();
 
-		function onOverlayAdd(e){
-		    console.log(e);
-		}
-	// mapZoomed();
 	geocoder = L.Control.geocoder().addTo(map);
 	sidebar = L.control.sidebar('sidebar');
 	sidebar.addTo(map);
@@ -50,7 +41,21 @@ $(document).ready(function() {
 
 
 
+
 });
+function overlayAdd(e){
+currentOverlay = e.layer;
+}
+
+function overlayRemove(e){
+	currentOverlay = null;
+}
+
+
+
+
+
+
 
 
 
@@ -58,41 +63,6 @@ function removeMapLayer(layer) {
 	if (map.hasLayer(layer)) {
 		map.removeLayer(layer);
 	}
-}
-
-function mapZoomed() {
-	map.on('zoomend', function(e) {
-		if (allowToZoom) {
-			if (map.getZoom() >= 6 && map.getZoom() <= 10) {
-				if (simpCounter == 0 || simpCounter == 2) {
-					if (map.hasLayer(world)) {
-						map.removeLayer(world);
-					}
-					if (map.hasLayer(ukAdminThree)) {
-						map.removeLayer(ukAdminThree);
-					}
-					adminOne.addTo(map);
-					simpCounter = 1;
-				}
-			} else if (map.getZoom() >= 11) {
-				if (simpCounter == 0 || simpCounter == 1) {
-					simpCounter = 2;
-					if (map.hasLayer(adminOne)) {
-						map.removeLayer(adminOne);
-					}
-					ukAdminThree.addTo(map)
-				}
-			} else if (map.getZoom() <= 6) { //Return to original data
-				if (simpCounter == 1 || simpCounter == 2) {
-					if (map.hasLayer(adminOne)) {
-						map.removeLayer(adminOne);
-					}
-					world.addTo(map);
-					simpCounter = 0;
-				}
-			}
-		}
-	});
 }
 
 function disableMapInteraction() {
@@ -117,13 +87,6 @@ function enableMapInteraction() {
 	document.getElementById('map').style.cursor = 'grab';
 }
 
-function removeChoroplethLayers(){
-	console.log(layers);
-	for(var i=0; i<layers.length; i++){
-			removeMapLayer(layers[i]);
-			layers.splice(i,1);
-	}
-}
 
 
 function getBaseURL() {

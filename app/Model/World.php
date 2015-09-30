@@ -12,82 +12,101 @@ class World extends Model
 {
     public $useDbConfig = 'postgresql';
 
-    public function updateReview($results)
+    public function getInterquatileUser(){
+      $results = $this->find('all',array(
+        'fields'=>array('World.users', 'ntile(5) over (order by "users") as quartile'),
+        'group'=>'World.users',
+        'order'=>'World.users DESC'
+      ));
+    $quartile = array();
+    foreach ($results as $result => $value) {
+      $q = $value[0]['quartile'];
+        if(!array_key_exists($q,$quartile)){
+          $quartile[$q]=$value['World']['users'];
+        }
+    }
+      $quartile['geo_layer_name']='worlds';
+      $quartile['geo_layer_style']='venue_sld_style';
+
+      return $quartile;
+    }
+
+    public function getInterquatileReview(){
+      $results = $this->find('all',array(
+        'fields'=>array('World.review', 'ntile(5) over (order by "review") as quartile'),
+        'group'=>'World.review',
+        'order'=>'World.review DESC'
+      ));
+    $quartile = array();
+    foreach ($results as $result => $value) {
+      $q = $value[0]['quartile'];
+        if(!array_key_exists($q,$quartile)){
+          $quartile[$q]=$value['World']['review'];
+        }
+    }
+      $quartile['geo_layer_name']='worlds';
+      $quartile['geo_layer_style']='review_sld_style';
+      return $quartile;
+    }
+
+    public function getLastQuery()
     {
-        $this->updateAll(array('World.review' => 0));
+        $dbo = $this->getDatasource();
+        $logs = $dbo->getLog();
+        $lastLog = end($logs['log']);
 
-         foreach ($results as $result => $value) {
-            $lat = $value['Venue']['lat'];
-            $lng = $value['Venue']['lng'];
-            $count = $value[0]['mycount'];
-        $ans = $this->find('first',
-         array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-            $this->id = $ans['World']['id'];
-            $this->saveField('review', $this->field('review') + $count);
-
-         }
-        return $this->getInterquatile('review');
-
-
+        return $lastLog['query'];
     }
 
-    public function getInterquatile($column){
-      $results = $this->find('all',array('order'=>array("World.$column ASC"),
-                                            'fields'=>array("World.$column"),
-                                            'conditions' => array("World.$column > 0")));
-
-      $vals = array();
-      foreach ($results as $key => $value) {
-        $vals[] = $value['World']["$column"];
-      }
-      $count = count($results);
-
-      $first = round( .25 * ( $count + 1 ) ) - 1;
-      $second = round($count/2);
-      $third = round( .75 * ( $count + 1 ) ) - 1;
-
-      $quartiles = array('first_q'=> floatval($vals[$first]),
-                         'second_q'=> floatval($vals[$second]),
-                         'third_q'=> floatval($vals[$third]),
-                         'geo_layer_name'=>'worlds',
-                         'results' => $vals[$count-1]);
-                         return $quartiles;
-    }
-
-    public function updateUserCount($data){
-      $this->updateAll(array('World.users' => 0));
-
-      foreach ($data as $d => $value) {
-
-        $lat = $value['lat'];
-        $lng = $value['lng'];
-
-        $ans = $this->find('first',
-         array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-            if(!empty($ans)){
-              $this->id = $ans['World']['id'];
-              $this->saveField('users', $this->field('users') + 1);
-            }
-      }
-      return $this->getInterquatile('users');
+    public function updateUserCount($data)
+    {
+        $saveMany =array();
+        $this->updateAll(array('World.users' => 0));
+        foreach ($data as $d => $value) {
+            $user_count = $value[0]['user_count'];
+            $postgre_world_id = $value['Venue']['postgre_world_id'];
+            if(isset($user_count) && isset($postgre_world_id))
+            {
+              $saveMany[]=array('World'=>array('id'=>$postgre_world_id,'users'=>$user_count));
+          }
+        }
+        $this->saveMany($saveMany);
+        return $this->getInterquatileUser();
     }
 
     public function updateVenueRating($data){
-      $this->updateAll(array('World.venues' => 0),array('World.review' => 0));
-
+      $saveMany = array();
+      $this->updateAll(array('World.venues' => 0));
       foreach ($data as $d => $value) {
-        $lat = $value['lat'];
-        $lng = $value['lng'];
-        $rating = $value['avg'];
-        $count = $value['venue_count'];
-        $ans = $this->find('first',
-         array('conditions' => array("st_contains(World.geom,ST_GeomFromText('POINT($lng $lat)', 4326))")));
-            if(!empty($ans)){
-              $this->id = $ans['World']['id'];
-              $this->saveField('venues', $rating);
-              $this->saveField('review', $this->field('review') + $count);
-            }
+          $avg_rating = $value['0']['avg_rating'];
+          $postgre_world_id = $value['Venue']['postgre_world_id'];
+
+          if(isset($avg_rating) && isset($postgre_world_id))
+          {
+            $saveMany[]=array('World'=>array('id'=>$postgre_world_id,'venues'=>$avg_rating));
+          }
       }
-      return $this->getInterquatile('venues');
+      $this->saveMany($saveMany);
+      $wms_details = array();
+      $wms_details['geo_layer_name']='worlds';
+      $wms_details['geo_layer_style']='venue_sld_style';
+      return $wms_details;
     }
+
+    public function updateReview($data)
+    {
+      $saveMany = array();
+      $this->updateAll(array('World.review' => 0));
+      foreach ($data as $d => $value) {
+          $review_count = $value[0]['review_count'];
+          $postgre_world_id = $value['Venue']['postgre_world_id'];
+          if(isset($review_count) && isset($postgre_world_id))
+          {
+            $saveMany[]=array('World'=>array('id'=>$postgre_world_id,'review'=>$review_count));
+          }
+      }
+      $this->saveMany($saveMany);
+      return $this->getInterquatileReview();
+    }
+
 }
