@@ -11,72 +11,108 @@ App::uses('Model', 'Model');
 class Venue extends Model
 {
     public $hasMany = array(
-         'Review' => array(
-             'className' => 'Review', ), );
+        'Review' => array(
+            'className' => 'Review',),);
 
     public function getVenuesWithin($data)
     {
         $from = $data['from'];
         $to = $data['to'];
-        $group = array('Venue.postgre_world_id');
         $conditions = array('Venue.show_on_map' => 1,
-                        'Venue.created >=' => $from,
-                        'Venue.created <=' => $to,
-                        );
+            'Venue.inserted >=' => $from,
+            'Venue.inserted <=' => $to,
+        );
 
-    // $fields = array('Venue.lat','Venue.lng');
+        return $this->find('all', array(
+            'conditions' => $conditions,
+        ));
+    }
 
-    return $this->find('all', array(
-      'conditions' => $conditions,
-      // 'fields' => $fields
-    ));
+
+    public function getVenuesAdminOne($data){
+        $conditions = array('Venue.show_on_map' => 1,
+            'Venue.inserted >=' => $data['from'],
+            'Venue.inserted <=' => $data['to'],
+            'Venue.show_on_map' => 1
+        );
+        $group = array('Venue.postgre_admin_one_id');
+        $fields = array(
+            'Venue.lat',
+            'Venue.lng',
+            'Venue.postgre_admin_one_id',
+            'COUNT(Venue.postgre_admin_one_id) as count'
+        );
+        return $this->find('all', array(
+            'fields' => $fields,
+            'conditions' => $conditions,
+            'group' => $group
+        ));
+    }
+
+    public function getVenuesUkAdminThree($data){
+        $conditions = array('Venue.show_on_map' => 1,
+            'Venue.inserted >=' => $data['from'],
+            'Venue.inserted <=' => $data['to'],
+            'Venue.show_on_map' => 1
+        );
+        $group = array('Venue.postgre_uk_id');
+        $fields = array(
+            'Venue.lat',
+            'Venue.lng',
+            'Venue.postgre_uk_id',
+            'COUNT(Venue.postgre_uk_id) as count'
+        );
+        return $this->find('all', array(
+            'fields' => $fields,
+            'conditions' => $conditions,
+            'group' => $group
+        ));
     }
 
     public function getLatLng($data)
     {
         $results = $this->find('all', array(
-        'fields' => array('Venue.lat', 'Venue.lng'),
-        'conditions' => array('Venue.id' => $data),
-      ));
+            'fields' => array('Venue.lat', 'Venue.lng'),
+            'conditions' => array('Venue.id' => $data),
+        ));
         $latlng = array();
-      // print_r($results);
-      foreach ($results as $result => $value) {
-          $latlng[] = $value['Venue'];
-      }
+        // print_r($results);
+        foreach ($results as $result => $value) {
+            $latlng[] = $value['Venue'];
+        }
         return $latlng;
     }
 
 
+    public function findRatingsById($id)
+    {
+        $venue = $this->findAllById($id);
+        $reviews = $venue[0]['Review'];
+        $ratings = array('terrible' => 0, 'poor' => 0, 'average' => 0, 'v-good' => 0, 'excellent' => 0);
+        foreach ($reviews as $review => $value) {
+            switch ((int)$value['average_rating']) {
+                case 1:
+                    $ratings['terrible']++;
+                    break;
+                case 2:
+                    $ratings['poor']++;
+                    break;
+                case 3:
+                    $ratings['average']++;
+                    break;
+                case 4:
+                    $ratings['v-good']++;
+                    break;
+                case 5:
+                    $ratings['excellent']++;
+                    break;
 
-
-    public function findRatingsById($id){
-      $venue = $this->findAllById($id);
-      $reviews = $venue[0]['Review'];
-      $ratings = array('terrible'=>0,'poor'=>0,'average'=>0,'v-good'=>0,'excellent'=>0);
-      foreach ($reviews as $review => $value) {
-          switch ((int) $value['average_rating']) {
-      case 1:
-        $ratings['terrible']++;
-        break;
-      case 2:
-      $ratings['poor']++;
-        break;
-      case 3:
-      $ratings['average']++;
-        break;
-      case 4:
-      $ratings['v-good']++;
-        break;
-      case 5:
-      $ratings['excellent']++;
-        break;
-
-      default:
-        # code...
-        break;
-    }
-      }
-      return $ratings;
+                default:
+                    # code...
+                    break;
+            }
+        }
+        return $ratings;
 
     }
 }

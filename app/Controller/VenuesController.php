@@ -45,26 +45,25 @@ class VenuesController extends AppController
     }
 
     public function get_review(){
-      //for new
       $this->autoRender = false;
       if ($this->request->is('ajax')) {
 
           $result = $this->Review->getReviewPaginated($this->request->query);
 
           $reviews['terrible'] = $this->Review->getReviewCountByPerf(
-          $this->request->query,1,2);
+          $this->request->query,0,1);
 
           $reviews['poor'] = $this->Review->getReviewCountByPerf(
-          $this->request->query,2,3);
+          $this->request->query,1,2);
 
           $reviews['average'] = $this->Review->getReviewCountByPerf(
-          $this->request->query,3,4);
+          $this->request->query,2,3);
 
           $reviews['v_good'] = $this->Review->getReviewCountByPerf(
-          $this->request->query,4,5);
+          $this->request->query,3,4);
 
           $reviews['excellent'] = $this->Review->getReviewCountByPerf(
-          $this->request->query,5,6);
+          $this->request->query,4,5);
           $performances = array(
             'terrible' =>count($reviews['terrible']),
             'poor'=>count($reviews['poor']),
