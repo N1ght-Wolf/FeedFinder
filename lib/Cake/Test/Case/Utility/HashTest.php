@@ -300,38 +300,25 @@ class HashTest extends CakeTestCase {
 		$result = Hash::maxDimensions($data);
 		$this->assertEquals($result, 2);
 
-		$data = array('1' => array('1.1' => '1.1.1'), '2', '3' => array('3.1' => array('3.1.1' => '3.1.1.1')));
+		$data = array(
+			'1' => array('1.1' => '1.1.1'),
+			'2',
+			'3' => array('3.1' => array('3.1.1' => '3.1.1.1'))
+		);
 		$result = Hash::maxDimensions($data);
 		$this->assertEquals($result, 3);
 
 		$data = array(
-			'1' => array('1.1' => '1.1.1'),
-			array('2' => array('2.1' => array('2.1.1' => '2.1.1.1'))),
-			'3' => array('3.1' => array('3.1.1' => '3.1.1.1'))
-		);
-		$result = Hash::maxDimensions($data);
-		$this->assertEquals($result, 4);
-
-		$data = array(
-			'1' => array('1.1' => '1.1.1'),
-			array('2' => array('2.1' => array('2.1.1' => array('2.1.1.1')))),
-			'3' => array('3.1' => array('3.1.1' => '3.1.1.1'))
-		);
-		$result = Hash::maxDimensions($data);
-		$this->assertEquals($result, 5);
-
-		$data = array(
-			'1' => array('1.1' => '1.1.1'),
-			array('2' => array('2.1' => array('2.1.1' => array('2.1.1.1' => '2.1.1.1.1')))),
-			'3' => array('3.1' => array('3.1.1' => '3.1.1.1'))
-		);
-		$result = Hash::maxDimensions($data);
-		$this->assertEquals($result, 5);
-
-		$data = array(
-			'1' => array('1.1' => '1.1.1'),
-			array('2' => array('2.1' => array('2.1.1' => array('2.1.1.1' => '2.1.1.1.1')))),
-			'3' => array('3.1' => array('3.1.1' => '3.1.1.1'))
+			'1' => array(
+				'1.1' => '1.1.1',
+				'1.2' => array(
+					'1.2.1' => array(
+						'1.2.1.1',
+						array('1.2.2.1')
+					)
+				)
+			),
+			'2' => array('2.1' => '2.1.1')
 		);
 		$result = Hash::maxDimensions($data);
 		$this->assertEquals($result, 5);
@@ -834,6 +821,32 @@ class HashTest extends CakeTestCase {
 
 		$result = Hash::extract($data, '{n}.{s}.Nesting.test.1');
 		$this->assertEquals(array('foo'), $result);
+	}
+
+/**
+ * Test wildcard matcher
+ *
+ * @return void
+ */
+	public function testExtractWildcard() {
+		$data = array(
+			'02000009C5560001' => array('name' => 'Mr. Alphanumeric'),
+			'2300000918020101' => array('name' => 'Mr. Numeric'),
+			'390000096AB30001' => array('name' => 'Mrs. Alphanumeric'),
+			'stuff' => array('name' => 'Ms. Word'),
+			123 => array('name' => 'Mr. Number'),
+			true => array('name' => 'Ms. Bool'),
+		);
+		$result = Hash::extract($data, '{*}.name');
+		$expected = array(
+			'Mr. Alphanumeric',
+			'Mr. Numeric',
+			'Mrs. Alphanumeric',
+			'Ms. Word',
+			'Mr. Number',
+			'Ms. Bool',
+		);
+		$this->assertEquals($expected, $result);
 	}
 
 /**

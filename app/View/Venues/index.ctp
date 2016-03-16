@@ -1,8 +1,5 @@
 <?php
 echo $this->Html->script('en-gb', array('inline' => false));
-echo $this->Html->script('bootstrap-rating.min', array('inline' => false));
-echo $this->Html->script('jquery.bootpag.min', array('inline' => false));
-echo $this->Html->script('moment', array('inline' => false));
 echo $this->Html->script('daterange', array('inline' => false));
 
 

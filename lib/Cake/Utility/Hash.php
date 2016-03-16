@@ -14,7 +14,7 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('String', 'Utility');
+App::uses('CakeText', 'Utility');
 
 /**
  * Library of array functions for manipulating and extracting data
@@ -76,6 +76,7 @@ class Hash {
  *
  * - `{n}` Matches any numeric key, or integer.
  * - `{s}` Matches any string key.
+ * - `{*}` Matches any value.
  * - `Foo` Matches any key with the exact same value.
  *
  * There are a number of attribute operators:
@@ -111,7 +112,7 @@ class Hash {
 		if (strpos($path, '[') === false) {
 			$tokens = explode('.', $path);
 		} else {
-			$tokens = String::tokenize($path, '.', '[', ']');
+			$tokens = CakeText::tokenize($path, '.', '[', ']');
 		}
 
 		$_key = '__set_item__';
@@ -171,16 +172,16 @@ class Hash {
  * @return bool
  */
 	protected static function _matchToken($key, $token) {
-		if ($token === '{n}') {
-			return is_numeric($key);
+		switch ($token) {
+			case '{n}':
+				return is_numeric($key);
+			case '{s}':
+				return is_string($key);
+			case '{*}':
+				return true;
+			default:
+				return is_numeric($token) ? ($key == $token) : $key === $token;
 		}
-		if ($token === '{s}') {
-			return is_string($key);
-		}
-		if (is_numeric($token)) {
-			return ($key == $token);
-		}
-		return ($key === $token);
 	}
 
 /**
@@ -257,7 +258,7 @@ class Hash {
 		if (strpos($path, '[') === false) {
 			$tokens = explode('.', $path);
 		} else {
-			$tokens = String::tokenize($path, '.', '[', ']');
+			$tokens = CakeText::tokenize($path, '.', '[', ']');
 		}
 
 		if (strpos($path, '{') === false && strpos($path, '[') === false) {
@@ -340,7 +341,7 @@ class Hash {
 		if (strpos($path, '[') === false) {
 			$tokens = explode('.', $path);
 		} else {
-			$tokens = String::tokenize($path, '.', '[', ']');
+			$tokens = CakeText::tokenize($path, '.', '[', ']');
 		}
 
 		if (strpos($path, '{') === false && strpos($path, '[') === false) {
@@ -758,15 +759,11 @@ class Hash {
  * @return int The maximum number of dimensions in $data
  * @link http://book.cakephp.org/2.0/en/core-utility-libraries/hash.html#Hash::maxDimensions
  */
-	public static function maxDimensions(array $data) {
+	public static function maxDimensions($data) {
 		$depth = array();
 		if (is_array($data) && reset($data) !== false) {
 			foreach ($data as $value) {
-				if (is_array($value)) {
-					$depth[] = self::dimensions($value) + 1;
-				} else {
-					$depth[] = 1;
-				}
+				$depth[] = static::maxDimensions($value) + 1;
 			}
 		}
 		return empty($depth) ? 0 : max($depth);

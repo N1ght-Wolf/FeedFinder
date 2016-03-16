@@ -1,22 +1,21 @@
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBK_4F1YBeVbvcr_KCqYEirwi3sD8w2G1Q&callback=initMap" async defer></script>
 <?php
-echo $this->Html->script('L.TileLayer.BetterWMS', array('inline' => false));
-echo $this->Html->script('styledLayerControl', array('inline' => false));
-echo $this->Html->script('L.Control.Locate.min.js', array('inline' => false));
-echo $this->Html->script('moment', array('inline' => false));
+// plugins scripts
+echo $this->Html->script('url.min', array('inline'=>false));
 echo $this->Html->script('en-gb', array('inline' => false));
-echo $this->Html->script('spin.min');
-echo $this->Html->script('leaflet-sidebar');
-echo $this->Html->script('Control.Geocoder');
-echo $this->Html->script('leaflet-map');
-echo $this->Html->script('stats');
-echo $this->Html->script('https://rawgit.com/NBTSolutions/Leaflet.Dialog/master/Leaflet.Dialog.js');
-echo $this->Html->script('leaflet.spin', array('inline' => false));
+echo $this->Html->script('moment', array('inline' => false));
+echo $this->Html->script('https://rawgit.com/Turbo87/sidebar-v2/master/js/jquery-sidebar.min.js', array('inline' => false));
 
-//css scripts
-echo $this->Html->css('stats');
-echo $this->Html->css('L.Control.Locate.min');
-echo $this->Html->css('Control.Geocoder');
-echo $this->Html->css('leaflet-sidebar');
-echo $this->Html->css('https://rawgit.com/NBTSolutions/Leaflet.Dialog/master/Leaflet.Dialog.css');
+// my scripts
+echo $this->Html->script('dashboard', array('inline' => false));
+echo $this->Html->script('google-map', array('inline' => false));
+
+echo $this->Html->css('dashboard');
+echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-sidebar.css');
+
 ?>
-<?php echo $this->element('map-element'); ?>
+
+<div id="map"></div>
+
+
+
