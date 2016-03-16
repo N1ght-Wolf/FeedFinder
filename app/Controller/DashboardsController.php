@@ -30,8 +30,31 @@ class DashboardsController extends AppController
     // index page action
     public function index()
     {
+
     }
 
+    public function click_location(){
+         $this->autoRender = false;
+        if ($this->request->is('ajax')){
+            $lat = $this->request->query['lat'];
+            $lng = $this->request->query['lng'];
+            $from = $this->request->query['from'];
+            $to = $this->request->query['to'];
+            $id = $this->AdminOne->query("SELECT id FROM admin_ones WHERE ST_Contains(geom, ST_GeomFromText('POINT($lng $lat)',4326))");
+            if(isset($id)){
+            $postgre_id = $id['0']['0']['id'];
+            $reviews = $this->Review->reviewsFromVenue($postgre_id,$from,$to);
+            $venues = $this->Venue->venuesWithID($postgre_id,$from,$to);
+            $friendliness = $this->Review->averageFriendlinessVenue($postgre_id,$from,$to);
+            $result = array('reviews'=>$reviews,'venues'=>$venues,'friendliness'=>$friendliness['0']['0']['count']);
+            echo json_encode($result); 
+            }else{
+                $result = array('reviews'=>0,'venues'=>0,'friendliness'=>0);
+                echo json_encode($result);
+            }
+            
+        }
+    }
 
     public function send_email()
     {
@@ -216,7 +239,9 @@ class DashboardsController extends AppController
             $results = $this->Review->getVenueRatingUk($data);
             //uodate venue rating for each county/city
             $wms_details = $this->UkAdminThree->updateFriendliness($results);
-            $json = array('cluster_data'=>$results,'wms_details'=>$wms_details);
+            $json = array('cluster_data'=>$results
+                ,'wms_details'=>$wms_details
+                );
 
             echo json_encode($json);
         }
@@ -265,29 +290,37 @@ class DashboardsController extends AppController
                 'MIN(Review.created)',
                 'Venue.postgre_admin_one_id',
                 'Review.user_id',
-                'Venue.lat','Venue.lng');
+                'Venue.latitude','Venue.longitude'
+                );
             $results = $this->Review->getUsersFirstLocation(
                 $this->request->query,
                 $group,
                 $fields
             );
-            $wms_details = $this->AdminOne->updateUserCount($results);
-            $json = array('cluster_data'=>$results,'wms_details'=>$wms_details);
+           $wms_details = $this->AdminOne->updateUserCount($results);
+            $json = array('cluster_data'=> $results
+                 ,'wms_details'=>$wms_details
+                );
             echo json_encode($json);
         }
     }
+
 
     public function users_interq_ukadminthree()
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
             $group = array('Venue.postgre_uk_id');
+
             $fields = array(
                 'COUNT(Venue.postgre_uk_id) as count',
                 'MIN(Review.created)',
                 'Venue.postgre_uk_id',
                 'Review.user_id',
-                'Venue.lat','Venue.lng');
+                'Venue.latitude','Venue.longitude'
+            );
+            
+
             $results = $this->Review->getUsersFirstLocation(
                 $this->request->query,
                 $group,
@@ -296,7 +329,6 @@ class DashboardsController extends AppController
 
             $wms_details = $this->UkAdminThree->updateUserCount($results);
             $json = array('cluster_data'=>$results,'wms_details'=>$wms_details);
-
             echo json_encode($json);
         }
     }

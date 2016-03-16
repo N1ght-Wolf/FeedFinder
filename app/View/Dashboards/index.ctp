@@ -9,11 +9,14 @@ echo $this->Html->script('leaflet-sidebar');
 echo $this->Html->script('Control.Geocoder');
 echo $this->Html->script('leaflet-map');
 echo $this->Html->script('stats');
+echo $this->Html->script('https://rawgit.com/NBTSolutions/Leaflet.Dialog/master/Leaflet.Dialog.js');
 echo $this->Html->script('leaflet.spin', array('inline' => false));
+
 //css scripts
 echo $this->Html->css('stats');
 echo $this->Html->css('L.Control.Locate.min');
 echo $this->Html->css('Control.Geocoder');
 echo $this->Html->css('leaflet-sidebar');
+echo $this->Html->css('https://rawgit.com/NBTSolutions/Leaflet.Dialog/master/Leaflet.Dialog.css');
 ?>
 <?php echo $this->element('map-element'); ?>

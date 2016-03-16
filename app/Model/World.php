@@ -25,7 +25,7 @@ class World extends Model
           $quartile[$q]=$value['World']['users'];
         }
     }
-      $quartile['geo_layer_name']='worlds';
+      $quartile['geo_layer_name']='worusers_interq_adminonelds';
       $quartile['geo_layer_style']='venue_sld_style';
 
       return $quartile;

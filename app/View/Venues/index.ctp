@@ -21,7 +21,7 @@ echo $this->Html->script('daterange', array('inline' => false));
         </h4>
         <?php echo $venue['Venue']['address']; ?>
         <?php echo $venue['Venue']['city']; ?>
-        <?php echo $venue['Venue']['postalCode']; ?>
+        <?php echo $venue['Venue']['postcode']; ?>
         <?php echo $venue['Venue']['country']; ?>
     </div>
     <div class="row">

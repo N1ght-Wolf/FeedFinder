@@ -11,15 +11,15 @@ App::uses('Model', 'Model');
 class Review extends Model
 {
     public $belongsTo = array(
-        'User' => array('type' => 'INNER'),
-        'Venue' => array('type' => 'INNER'),);
+        'User', 
+        'Venue');
 
     public function getVenueAndReviewCount($data)
     {
         $conditions = array('Review.created >=' => $data['from'],
             'Review.created <=' => $data['to'],
-            'Venue.show_on_map' => 1,
-            'Review.enabled' => 1,
+            'Venue.flag' => 0,
+            'Review.flag' => 0,
         );
 
 
@@ -32,10 +32,10 @@ class Review extends Model
 
     public function getUsersFirstLocation($data, $group, $fields)
     {
-        $conditions = array('Review.created >=' => $data['from'],
+        $conditions = array(
+            'Review.created >=' => $data['from'],
             'Review.created <=' => $data['to'],
-            'Venue.show_on_map' => 1,
-            'Review.enabled' => 1,
+            'Review.flag' => 0,
         );
 
         $results = $this->find('all', array(
@@ -47,6 +47,27 @@ class Review extends Model
         return $results;
     }
 
+    public function reviewsFromVenue($id,$from,$to){
+        return $this->find('count',array(
+            'conditions'=> array(
+                'Venue.postgre_admin_one_id'=>$id,
+                'Review.created >=' => $from,
+                'Review.created <=' => $to,
+                )
+            ));
+    }
+
+    public function averageFriendlinessVenue($id, $from, $to){
+        return $this->find('all',array(
+            'fields'=>array('Round(AVG(Review.q1+Review.q2+Review.q3+Review.q4)/4,1) as count'),
+            'conditions'=> array(
+                'Venue.postgre_admin_one_id'=>$id,
+                'Review.created >=' => $from,
+                'Review.created <=' => $to,
+                )
+            ));
+    }
+
     public function getReviewUk($data)
     {
         $from = $data['from'];
@@ -55,16 +76,17 @@ class Review extends Model
         $conditions = array(
             'Review.created >=' => $from,
             'Review.created <=' => $to,
-            'Review.enabled' => 1,
-            'Venue.show_on_map' => 1,
+            'Review.flag' => 0,
+            'Venue.flag' => 0,
         );
 
         $fields = array(
-            'Venue.lat',
-            'Venue.lng',
+            'Venue.latitude',
+            'Venue.longitude',
             'Venue.postgre_uk_id',
             'COUNT(Venue.postgre_uk_id) AS count'
         );
+
         $result = $this->find('all', array(
             'conditions' => $conditions,
             'fields' => $fields,
@@ -80,13 +102,13 @@ class Review extends Model
         $conditions = array(
             'Review.created >=' => $from,
             'Review.created <=' => $to,
-            'Review.enabled' => 1,
-            'Venue.show_on_map' => 1,
+            'Review.flag' => 0,
+            'Venue.flag' => 0,
         );
 
         $fields = array(
-            'Venue.lat',
-            'Venue.lng',
+            'Venue.latitude',
+            'Venue.longitude',
             'Venue.postgre_admin_one_id',
             'COUNT(Venue.postgre_admin_one_id) AS count'
         );
@@ -105,8 +127,8 @@ class Review extends Model
         $conditions = array(
             'Review.created >=' => $from,
             'Review.created <=' => $to,
-            'Review.enabled' => 1,
-            'Venue.show_on_map' => 1,
+            'Review.flag' => 0,
+            'Venue.flag' => 0,
         );
 
         $fields = array(
@@ -159,7 +181,7 @@ class Review extends Model
         );
 
         $conditions = array(
-            'Review.enabled' => 1,
+            'Review.flag' => 1,
             'Review.created >=' => $from,
             'Review.created <=' => $to,
         );
@@ -177,14 +199,14 @@ class Review extends Model
         $to = $data['to'];
         $group = array('Venue.postgre_admin_one_id');
         $field = array(
-            'Round(AVG(Review.average_rating),1) as count',
+            'Round(AVG(Review.q1+Review.q2+Review.q3+Review.q4)/4,1) as count',
             'Venue.postgre_admin_one_id',
-            'Venue.lat',
-            'Venue.lng'
+            'Venue.latitude',
+            'Venue.longitude'
         );
 
         $conditions = array(
-            'Review.enabled' => 1,
+            'Review.flag' => 0,
             'Review.created >=' => $from,
             'Review.created <=' => $to,
         );
@@ -203,12 +225,13 @@ class Review extends Model
         $to = $data['to'];
         $group = array('Venue.postgre_uk_id');
         $field = array(
-            'Round(AVG(Review.average_rating),1) as count',
-            'Venue.postgre_uk_id',
-        );
+            'Round(AVG(Review.q1+Review.q2+Review.q3+Review.q4)/4,1) as count',
+ 'Venue.postgre_admin_one_id',
+            'Venue.latitude',
+            'Venue.longitude'        );
 
         $conditions = array(
-            'Review.enabled' => 1,
+            'Review.flag' => 0,
             'Review.created >=' => $from,
             'Review.created <=' => $to,
         );
@@ -343,7 +366,6 @@ class Review extends Model
             'Review.average_rating >=' => $low_end,
             'Review.average_rating <' => $high_end,
         );
-
         return $this->find('count', array('conditions' => $conditions));
     }
 }

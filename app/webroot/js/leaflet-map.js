@@ -4,32 +4,53 @@ var sidebar;
 var uri;
 var legend, currentOverlay;
 var layerGroup;
-
+var clickLocation;
+var dialog;
 $(document).ready(function () {
-
-    //var street = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-    //    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    //    maxZoom: 18,
-    //    id: 'davidoyeku.n73bd296',
-    //    accessToken: mapToken
-    //});
 
     var street = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     });
 
-
     map = L.map('map', {
         center: [51.505, -0.09],
         zoom: 5,
+        zoomControl:false,
         layers: [street],
         inertiaMaxSpeed: 800
     });
 
+    L.control.zoom({
+        position:'topright'
+    }).addTo(map);
+    dialog = L.control.dialog(options).addTo(map);
+
     map.on('layeradd', overlayAdd);
     map.on('overlayadd', overlayAdd);
     map.on('overlayremove', overlayRemove);
-    //map.addEventListener('click', identify);
+    map.on('click', function(e) {
+        clickLocation = {lat:e.latlng.lat,lng:e.latlng.lng,from:currentDateSelection.from,to:currentDateSelection.to};
+                       $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: $.ajaxSettings.url + 'click_location',
+                data: clickLocation,
+                success: function (data) {
+                    dialog.setContent(
+                        "<h3>Review  "+data.reviews+"</h3>"+
+                        "<br><h3>Venues  "+data.venues+"</h3>"+
+                        "<br><h3>Friendliness  "+data.friendliness+"</h3>");
+                    dialog.open();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  
+
+                }
+            });
+
+
+    // alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+});
 
     var lc = L.control.locate({
         position: 'topright',
@@ -39,7 +60,10 @@ $(document).ready(function () {
         }
     }).addTo(map);
 
-    geocoder = L.Control.geocoder().addTo(map);
+    geocoder = L.Control.geocoder({
+        placeholder : "enter postcode, county or country"
+    }).addTo(map);
+
     sidebarControl = L.control.sidebar('sidebar');
     sidebarControl.addTo(map);
 
@@ -54,37 +78,37 @@ function overlayRemove(e) {
     currentOverlay = null;
 }
 
-//function identify(e) {
-//    // set parameters needed for GetFeatureInfo WMS request
-//    var BBOX = map.getBounds().toBBoxString();
-//    var WIDTH = map.getSize().x;
-//    var HEIGHT = map.getSize().y;
-//    var X = map.layerPointToContainerPoint(e.layerPoint).x;
-//    var Y = map.layerPointToContainerPoint(e.layerPoint).y;
-//    // compose the URL for the request
-//    var URL =
-//        geoserverUrl +
-//        'request=GetFeatureInfo' +
-//        '&SERVICE=WMS' +
-//        '&VERSION=1.1.1&LAYERS=cite:worlds&query_layers=cite:worlds&STYLES=review_sld_style&FORMAT=image%2Fpng8&TRANSPARENT=true&HEIGHT=' + HEIGHT + '&WIDTH=' + WIDTH + '&BBOX=' + BBOX + '&X=' + X + '&Y=' + Y;
-//
-//    //send the asynchronous HTTP request using jQuery $.ajax
-//    $.ajax({
-//        url: URL,
-//        dataType: "json",
-//        type: "GET",
-//        success: function (data) {
-//            var popup = new L.Popup
-//            ({
-//                maxWidth: 300
-//            });
-//
-//            popup.setContent(data);
-//            popup.setLatLng(e.latlng);
-//            map.openPopup(popup);
-//        }
-//    });
-//}
+function identify(e) {
+   // set parameters needed for GetFeatureInfo WMS request
+   var BBOX = map.getBounds().toBBoxString();
+   var WIDTH = map.getSize().x;
+   var HEIGHT = map.getSize().y;
+   var X = map.layerPointToContainerPoint(e.layerPoint).x;
+   var Y = map.layerPointToContainerPoint(e.layerPoint).y;
+   // compose the URL for the request
+   var URL =
+       geoserverUrl +
+       'request=GetFeatureInfo' +
+       '&SERVICE=WMS' +
+       '&VERSION=1.1.1&LAYERS=cite:worlds&query_layers=cite:worlds&STYLES=review_sld_style&FORMAT=image%2Fpng8&TRANSPARENT=true&HEIGHT=' + HEIGHT + '&WIDTH=' + WIDTH + '&BBOX=' + BBOX + '&X=' + X + '&Y=' + Y;
+
+   //send the asynchronous HTTP request using jQuery $.ajax
+   $.ajax({
+       url: URL,
+       dataType: "json",
+       type: "GET",
+       success: function (data) {
+           var popup = new L.Popup
+           ({
+               maxWidth: 300
+           });
+
+           popup.setContent(data);
+           popup.setLatLng(e.latlng);
+           map.openPopup(popup);
+       }
+   });
+}
 
 
 function removeMapLayer(layer) {
@@ -114,6 +138,7 @@ function enableMapInteraction() {
     if (map.tap) map.tap.enable();
     document.getElementById('map').style.cursor = 'grab';
 }
+
 
 
 function getBaseURL() {

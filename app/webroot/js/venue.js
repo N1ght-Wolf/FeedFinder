@@ -235,13 +235,13 @@ function showPerformance(perf) {
 }
 
 
-function getReview(query) {
-    return $.ajax({
-        url: getBaseURL() + 'venues/get_reviews',
-        data: query,
-        dataType: 'json'
-    });
-}
+// function getReview(query) {
+//     return $.ajax({
+//         url: getBaseURL() + 'venues/get_reviews',
+//         data: query,
+//         dataType: 'json'
+//     });
+// }
 
 function getReviews(formData) {
     return $.ajax({

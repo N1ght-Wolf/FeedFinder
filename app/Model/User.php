@@ -51,12 +51,9 @@ class User extends Model {
     $from = $data['from-date'];
     $to = $data['to-date'];
     $action = $data['action'];
-
-
     $Review = new Review();
 
-
-    return   $Review->getDistinctUserReview($data);
+    return $Review->getDistinctUserReview($data);
   }
 
   public function getUserGraphData($data){
@@ -65,6 +62,7 @@ class User extends Model {
 
     $conditions = array('User.created >=' => $from,
                         'User.created <=' => $to);
+    
     $fields = array('UNIX_TIMESTAMP(User.created) * 1000 AS timestamp','COUNT(User.created) AS mycount');
     $group = array('YEAR(User.created)', 'MONTH(User.created)', 'DAY(User.created)');
 

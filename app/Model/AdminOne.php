@@ -19,7 +19,7 @@ class AdminOne extends Model
             'fields' => array('AdminOne.users', 'ntile(5) over (order by "users") as quartile'),
             'group' => 'AdminOne.users',
             'order' => 'AdminOne.users DESC'
-        ));
+            ));
         $quartile = array();
         foreach ($results as $result => $value) {
             $q = $value[0]['quartile'];
@@ -38,7 +38,7 @@ class AdminOne extends Model
             'fields' => array('AdminOne.review', 'ntile(5) over (order by "review") as quartile'),
             'group' => 'AdminOne.review',
             'order' => 'AdminOne.review DESC'
-        ));
+            ));
         $quartile = array();
         foreach ($results as $result => $value) {
             $q = $value[0]['quartile'];
@@ -58,7 +58,7 @@ class AdminOne extends Model
             'fields' => array('AdminOne.venues', 'ntile(5) over (order by "venues") as quartile'),
             'group' => 'AdminOne.venues',
             'order' => 'AdminOne.venues DESC'
-        ));
+            ));
         $quartile = array();
         foreach ($results as $result => $value) {
             $q = $value[0]['quartile'];
@@ -120,7 +120,7 @@ class AdminOne extends Model
         $this->saveMany($saveMany);
         $wms_details = array();
         $wms_details['geo_layer_name'] = 'admin_ones';
-        $wms_details['geo_layer_style'] = 'venue_sld_style';
+        $wms_details['geo_layer_style'] = 'friendliness_sld_style';
         return $wms_details;
     }
 

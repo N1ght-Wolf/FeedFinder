@@ -10,55 +10,86 @@ App::uses('Model', 'Model');
  */
 class Venue extends Model
 {
-    public $hasMany = array(
-        'Review' => array(
-            'className' => 'Review',),);
-
+        public $hasMany = array(
+         'Review' => array(
+             'className' => 'Review', ), );
+        
     public function getVenuesWithin($data)
     {
         $from = $data['from'];
         $to = $data['to'];
-        $conditions = array('Venue.show_on_map' => 1,
-            'Venue.inserted >=' => $from,
-            'Venue.inserted <=' => $to,
-        );
+
+        $conditions = array(
+            'Venue.flag' => 0,
+            'Venue.created >=' => $from,
+            'Venue.created <=' => $to
+            );
 
         return $this->find('all', array(
-            'conditions' => $conditions,
+            'conditions' => $conditions
         ));
     }
 
+    public function venuesWithId($id, $from, $to){
+        return $this->find('count',array(
+            'conditions'=> array('
+                Venue.postgre_admin_one_id'=>$id,
+                'Venue.created >=' => $from,
+                'Venue.created <=' => $to,
+                )
+            ));
+    }
 
+    /**
+    * Get venues created in time range 
+    */
     public function getVenuesAdminOne($data){
-        $conditions = array('Venue.show_on_map' => 1,
-            'Venue.inserted >=' => $data['from'],
-            'Venue.inserted <=' => $data['to'],
-            'Venue.show_on_map' => 1
+        $conditions = array(
+            'Venue.flag' => 0,
+            'Venue.created >=' => $data['from'],
+            'Venue.created <=' => $data['to'],
         );
         $group = array('Venue.postgre_admin_one_id');
         $fields = array(
-            'Venue.lat',
-            'Venue.lng',
+            'Venue.name',
+            'Venue.created',
+            'Venue.latitude',
+            'Venue.longitude',
             'Venue.postgre_admin_one_id',
+            'Venue.postcode',
+            'Venue.country',
+            'Venue.city',    
             'COUNT(Venue.postgre_admin_one_id) as count'
         );
         return $this->find('all', array(
-            'fields' => $fields,
+           'fields' => $fields,
             'conditions' => $conditions,
             'group' => $group
         ));
     }
 
     public function getVenuesUkAdminThree($data){
-        $conditions = array('Venue.show_on_map' => 1,
-            'Venue.inserted >=' => $data['from'],
-            'Venue.inserted <=' => $data['to'],
-            'Venue.show_on_map' => 1
+        $conditions = array('Venue.flag' => 0,
+            'Venue.created >=' => $data['from'],
+            'Venue.created <=' => $data['to'],
         );
         $group = array('Venue.postgre_uk_id');
+         $fields = array(
+            'Venue.name',
+            'Venue.created',
+            'Venue.latitude',
+            'Venue.longitude',
+            'Venue.postgre_uk_id',
+            'Venue.postcode',
+            'Venue.country',
+            'Venue.city',    
+            'COUNT(Venue.postgre_uk_id) as count'
+        );
         $fields = array(
-            'Venue.lat',
-            'Venue.lng',
+            'Venue.name',
+            'Venue.created',
+            'Venue.latitude',
+            'Venue.longitude',
             'Venue.postgre_uk_id',
             'COUNT(Venue.postgre_uk_id) as count'
         );
@@ -72,7 +103,7 @@ class Venue extends Model
     public function getLatLng($data)
     {
         $results = $this->find('all', array(
-            'fields' => array('Venue.lat', 'Venue.lng'),
+            'fields' => array('Venue.latitude', 'Venue.longitude'),
             'conditions' => array('Venue.id' => $data),
         ));
         $latlng = array();
@@ -106,7 +137,6 @@ class Venue extends Model
                 case 5:
                     $ratings['excellent']++;
                     break;
-
                 default:
                     # code...
                     break;
@@ -115,4 +145,6 @@ class Venue extends Model
         return $ratings;
 
     }
+
+
 }

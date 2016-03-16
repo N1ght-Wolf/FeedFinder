@@ -24,8 +24,8 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
     ?>
 		<!-- <link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' /> -->
-		<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
-		<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+ 		<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 		<script src="https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js"></script>
 			<!-- <script src="https://rawgit.com/vogdb/Leaflet.ActiveLayers/master/dist/leaflet.active-layers.min.js"></script> -->
 
@@ -37,7 +37,9 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 		<!-- <script src="https://rawgit.com/dreyescat/bootstrap-rating/master/bootstrap-rating.min.js"></script> -->
 		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 		<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.2/js/bootstrapValidator.min.js'></script>
-
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
 		<!-- <script src="//rawgit.com/botmonster/jquery-bootpag/master/lib/jquery.bootpag.min.js"></script> -->
 
 		<?php

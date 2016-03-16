@@ -68,7 +68,7 @@ class UkAdminThree extends Model
             }
         }
         $quartile['geo_layer_name'] = 'uk_admin_threes';
-        $quartile['geo_layer_style'] = 'review_sld_style';
+        $quartile['geo_layer_style'] = 'venue_sld_style';
         return $quartile;
     }
 
