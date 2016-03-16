@@ -52,7 +52,7 @@ class VenuesController extends AppController
 
           $reviews['terrible'] = $this->Review->getReviewCountByPerf(
           $this->request->query,0,1);
-
+          
           $reviews['poor'] = $this->Review->getReviewCountByPerf(
           $this->request->query,1,2);
 
@@ -64,12 +64,14 @@ class VenuesController extends AppController
 
           $reviews['excellent'] = $this->Review->getReviewCountByPerf(
           $this->request->query,4,5);
+          
           $performances = array(
             'terrible' =>count($reviews['terrible']),
             'poor'=>count($reviews['poor']),
             'average'=>count($reviews['average']),
             'v_good'=>count($reviews['v_good']),
             'excellent'=>count($reviews['excellent']));
+          
           $json = array('paginated' => $result, 'sorted'=>$reviews,'performances'=>$performances );
           echo json_encode($json);
       }

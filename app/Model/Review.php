@@ -343,6 +343,7 @@ class Review extends Model
         $from = $data['from'];
         $to = $data['to'];
         $id = $data['id'];
+
         $conditions = array(
             'Review.created >=' => $from,
             'Review.created <=' => $to,
