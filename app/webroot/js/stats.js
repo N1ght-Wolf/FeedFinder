@@ -16,7 +16,7 @@
     };
     //setting the default url for the ajax request
     $.ajaxSetup({
-        url: getBaseURL() + 'dashboards/',
+        url: getBaseURL() + 'feedfinder/dashboards/',
     });
 
     $(document).ready(function () {
