@@ -11,6 +11,7 @@ App::uses('Review', 'Model');
  * @package       app.Model
  */
 class User extends Model {
+    public $useDbConfig = 'users';
 
   var $name = 'User';
   var $hasMany = 'Review';
