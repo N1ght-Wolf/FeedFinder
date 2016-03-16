@@ -107,7 +107,6 @@ CakeLog::config('debug', array(
 	'types' => array('notice', 'info', 'debug'),
 	'file' => 'debug',
 ));
-CakePlugin::load('Highcharts');
 CakePlugin::loadAll();
 CakeLog::config('error', array(
 	'engine' => 'File',
