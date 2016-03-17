@@ -1,5 +1,5 @@
-angular.module('BlankApp', ['ngMaterial'])
+var feedfinder = angular.module('BlankApp', ['ngMaterial']);
 
-.controller('AppCtrl', function($scope) {
+feedfinder.controller('navbarController', function($scope) {
 	
-});
+ });

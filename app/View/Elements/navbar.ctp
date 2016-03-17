@@ -1,4 +1,4 @@
-<div ng-controller="AppCtrl" ng-cloak>
+<div ng-controller="navbarController" ng-cloak>
   <md-content>
     <md-toolbar>
       <div class="md-toolbar-tools">
