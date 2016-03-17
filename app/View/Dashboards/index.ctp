@@ -15,6 +15,30 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 
 ?>
 
+<div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="home">
+                <h1 class="sidebar-header">
+                    Control
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+
+                
+            </div>
+
+
+        </div>
+    </div>
+
+
 <div id="map"></div>
 
 
