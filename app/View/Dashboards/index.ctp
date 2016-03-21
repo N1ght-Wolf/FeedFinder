@@ -2,8 +2,10 @@
 <?php
 // plugins scripts
 echo $this->Html->script('url.min', array('inline'=>false));
+echo $this->Html->script('daterange', array('inline'=>false));
 echo $this->Html->script('en-gb', array('inline' => false));
 echo $this->Html->script('moment', array('inline' => false));
+echo $this->Html->script('https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js', array('inline' => false));
 echo $this->Html->script('https://rawgit.com/Turbo87/sidebar-v2/master/js/jquery-sidebar.min.js', array('inline' => false));
 
 // my scripts

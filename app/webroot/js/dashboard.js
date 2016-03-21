@@ -1,49 +1,74 @@
+var categories, times, explore;
+
 $(document).ready(function() {
 	var sidebar = $('#sidebar').sidebar();
 });
 
-feedfinder.controller('sidebarSelectController',function($scope){
-
+feedfinder.controller('sidebarSelectController',function($scope, $http){
 	$scope.categories = [
-	{id: 1, name: 'User'},
-	{id: 2, name: 'Venue'},
-	{id: 3, name: 'Review'},
-	{id: 4, name: 'Friendliness'}
-	];
-	$scope.times = [
-	{id: 1, name: 'Today'},
-	{id: 2, name: 'This Week'},
-	{id: 3, name: 'This Month'},
-	{id: 4, name: 'Last 3 Months'},
-	{id: 5, name: 'Last 6 Months'},
-	{id: 6, name: 'This year'},
-	{id: 7, name: 'All'}
-	];
-	$scope.explore = [
-	{id: 1, name: 'County'},
-	{id: 2, name: 'Super Output Area (UK)'},
+	{name: 'User', model: 'User'},
+	{name: 'Venue', model: 'Venue'},
+	{name: 'Review', model: 'Review'},
+	{name: 'Friendliness', model: 'Review'}
 	];
 
-	$scope.selectedTime = {id: 2, name: 'This Week'};
-	$scope.selectedCategory = {id: 1, name: 'User'};
-	$scope.selectedExplore = {id: 1, name: 'County'};
+	$scope.times = [
+	{name: timeArr[0], range:getDateRange(timeArr[0])}, //today
+	{name: timeArr[1], range:getDateRange(timeArr[1])}, //yesterday
+	{name: timeArr[2], range:getDateRange(timeArr[2])}, //this week
+	{name: timeArr[3], range:getDateRange(timeArr[3])}, //last week
+	{name: timeArr[4], range:getDateRange(timeArr[4])}, //this month
+	{name: timeArr[5], range:getDateRange(timeArr[5])}, //last month
+	{name: timeArr[6], range:getDateRange(timeArr[6])}, //last 3 months
+	{name: timeArr[7], range:getDateRange(timeArr[7])}, //last 6 months
+	{name: timeArr[8], range:getDateRange(timeArr[8])}, //this year
+	{name: timeArr[9], range:getDateRange(timeArr[9])}, //all
+	];
+
+	$scope.explore = [
+	{name: 'County'},
+	{name: 'Super Output Area (UK)'},
+	];
+
+	$scope.selectedTime = {name: timeArr[2], range:getDateRange(timeArr[2])},
+	$scope.selectedCategory = 	{name: 'Venue', model: 'Venue'};
+	$scope.selectedExplore = {name: 'County'};
 	/*
 		watch all of the select fields, when they change make an ajax request
-	*/
-	$scope.$watchCollection('[selectedCategory.name, selectedTime.name, selectedExplore]', function(newValues){
+		[categories,times,explore]
+		*/
+		$scope.$watchCollection('[selectedCategory.name, selectedTime.name, selectedExplore.name]', function(newValues){
+			var selectedCategory = search(newValues[0], $scope.categories);
+			var selectedTime = search(newValues[1], $scope.times);		
+			var selectedExplore = search(newValues[2], $scope.explore);
+
+			var query = {
+				category:selectedCategory,
+				time:selectedTime,
+				explore:selectedExplore
+			}
+
+			$.ajax({
+				type: 'GET',
+				dataType: 'json',
+				url: url()+'/map_query',
+				data:query,
+				success: function (data){
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+				}
+			});
+		});
 
 	});
 
-});
-
-feedfinder.directive("formOnChange", function($parse){
-	return {
-		require: "form",
-		link: function(scope, element, attrs){
-			var cb = $parse(attrs.formOnChange);
-			element.on("change", function(){
-				cb(scope);
-			});
+/*
+Loop over an array of objects and return the object that contains the nameKey
+*/
+function search(nameKey, myArray){
+	for (var i=0; i < myArray.length; i++) {
+		if (myArray[i].name === nameKey) {
+			return myArray[i];
 		}
 	}
-});
+}
