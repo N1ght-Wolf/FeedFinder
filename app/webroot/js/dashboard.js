@@ -30,7 +30,7 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 	{name: 'Super Output Area (UK)'},
 	];
 
-	$scope.selectedTime = {name: timeArr[2], range:getDateRange(timeArr[2])},
+	$scope.selectedTime = {name: timeArr[6], range:getDateRange(timeArr[6])},
 	$scope.selectedCategory = 	{name: 'Venue', model: 'Venue'};
 	$scope.selectedExplore = {name: 'County'};
 	/*
@@ -53,7 +53,9 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 				dataType: 'json',
 				url: url()+'/map_query',
 				data:query,
-				success: function (data){
+				success: function (result){
+					deleteMarkers();
+					displayMarkers(result);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
 				}

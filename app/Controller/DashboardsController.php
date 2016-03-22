@@ -43,8 +43,11 @@ class DashboardsController extends AppController
         if ($this->request->is('ajax')) {
             $this->disableCache();
             $this->layout = null;
-            $model = $this->request->query('category')['model'];
-            echo json_encode($this->request->query);
+            //get the sent 
+            $query = $this->request->query;
+            $model = $query['category']['model'];
+            $result = $this->$model->route($query);
+            echo json_encode($result);
         }
     }
 
