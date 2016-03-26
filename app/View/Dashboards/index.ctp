@@ -17,6 +17,7 @@ echo $this->Html->css('dashboard');
 echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-sidebar.css');
 
 ?>
+
 <div id="sidebar" class="sidebar collapsed">
     <!-- Nav tabs -->
     <div class="sidebar-tabs">

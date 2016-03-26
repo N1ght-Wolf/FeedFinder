@@ -30,7 +30,7 @@ class User extends Model {
       'fields'=>$fields,
       'group'=>$group
     ));
-
+    
     return $result;
   }
 

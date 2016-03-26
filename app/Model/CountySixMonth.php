@@ -8,7 +8,7 @@ App::uses('Model', 'Model');
  * Add your application-wide methods in the class below, your models
  * will inherit them.
  */
-class World extends Model
+class CountySixMonth extends Model
 {
     public $useDbConfig = 'postgresql';
 

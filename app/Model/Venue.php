@@ -35,11 +35,11 @@ class Venue extends Model
             'fields'=>array(
                 'Venue.name,
                 Venue.address,
-                Venue.created,
                 Venue.city,
                 Venue.country,
-                Venue.postcode, Venue.latitude, Venue.longitude'
-                ),
+                Venue.postcode, 
+                Venue.created,
+                Venue.latitude, Venue.longitude'),
             'conditions' => $conditions
             ));
     }

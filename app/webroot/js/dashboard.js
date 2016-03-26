@@ -1,7 +1,7 @@
-var categories, times, explore;
+var categories, times, explore,query;
 
 $(document).ready(function() {
-	var sidebar = $('#sidebar').sidebar();
+	var sidebar = $('#sidebar').sidebar().open('home');
 });
 
 feedfinder.controller('sidebarSelectController',function($scope, $http){
@@ -13,28 +13,28 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 	];
 
 	$scope.times = [
-	{name: timeArr[0], range:getDateRange(timeArr[0])}, //today
-	{name: timeArr[1], range:getDateRange(timeArr[1])}, //yesterday
-	{name: timeArr[2], range:getDateRange(timeArr[2])}, //this week
-	{name: timeArr[3], range:getDateRange(timeArr[3])}, //last week
-	{name: timeArr[4], range:getDateRange(timeArr[4])}, //this month
-	{name: timeArr[5], range:getDateRange(timeArr[5])}, //last month
-	{name: timeArr[6], range:getDateRange(timeArr[6])}, //last 3 months
-	{name: timeArr[7], range:getDateRange(timeArr[7])}, //last 6 months
-	{name: timeArr[8], range:getDateRange(timeArr[8])}, //this year
-	{name: timeArr[9], range:getDateRange(timeArr[9])}, //all
+	{name: timeArr[0], range:getDateRange(timeArr[0]), attr_name:'_today'}, //today
+	//{name: timeArr[1], range:getDateRange(timeArr[1])}, //yesterday
+	{name: timeArr[2], range:getDateRange(timeArr[2]), attr_name:'_this_week'}, //this week
+	//{name: timeArr[3], range:getDateRange(timeArr[3])}, //last week
+	{name: timeArr[4], range:getDateRange(timeArr[4]), attr_name:'_this_month'}, //this month
+	//{name: timeArr[5], range:getDateRange(timeArr[5])}, //last month
+	{name: timeArr[6], range:getDateRange(timeArr[6]), attr_name:'_three_months'}, //last 3 months
+	{name: timeArr[7], range:getDateRange(timeArr[7]), attr_name:'_six_month'}, //last 6 months
+	{name: timeArr[8], range:getDateRange(timeArr[8]), attr_name:'_this_year'}, //this year
+	{name: timeArr[9], range:getDateRange(timeArr[9]), attr_name:'_all'} //all
 	];
 
 	$scope.explore = [
-	{name: 'County'},
-	{name: 'Super Output Area (UK)'},
+	{name: 'County', groupBy:'Venue.county_id',pg_table:'County'},
+	{name: 'Super Output Area (UK)', groupBy:'Venue.soa_id',pg_table:'Soa'}
 	];
 
-	$scope.selectedTime = {name: timeArr[6], range:getDateRange(timeArr[6])},
-	$scope.selectedCategory = 	{name: 'Venue', model: 'Venue'};
-	$scope.selectedExplore = {name: 'County'};
-	/*
-		watch all of the select fields, when they change make an ajax request
+	$scope.selectedTime = {name: timeArr[9], range:getDateRange(timeArr[9]), attr_name:'_all'};
+	$scope.selectedCategory = {name: 'Review', model: 'Review'};
+	$scope.selectedExplore = {name: 'County', groupBy:'Venue.county_id',pg_table:'County'};
+
+		/*watch all of the select fields, when they change make an ajax request
 		[categories,times,explore]
 		*/
 		$scope.$watchCollection('[selectedCategory.name, selectedTime.name, selectedExplore.name]', function(newValues){
@@ -42,20 +42,19 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 			var selectedTime = search(newValues[1], $scope.times);		
 			var selectedExplore = search(newValues[2], $scope.explore);
 
-			var query = {
+			query = {
 				category:selectedCategory,
 				time:selectedTime,
 				explore:selectedExplore
 			}
-
+			console.log(query);
 			$.ajax({
 				type: 'GET',
 				dataType: 'json',
 				url: url()+'/map_query',
 				data:query,
 				success: function (result){
-					deleteMarkers();
-					displayMarkers(result);
+					queryCallBack(result);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
 				}
@@ -63,6 +62,66 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 		});
 
 	});
+
+function queryCallBack(result){
+	var name = result.request.category.name;
+	switch (name){
+		case 'Venue':
+			deleteMarkers();
+			displayMarkers(result.result);
+			break;
+		default:
+			deleteMarkers();
+			getChoroplethMap(result.result);
+			break;
+
+	}
+}
+
+function getChoroplethMap(result){
+	choroplethMap = new google.maps.ImageMapType({
+                    getTileUrl: function (coord, zoom) {
+                        var proj = map.getProjection();
+                        var zfactor = Math.pow(2, zoom);
+                        // get Long Lat coordinates
+                        var top = proj.fromPointToLatLng(new google.maps.Point(coord.x * 256 / zfactor, coord.y * 256 / zfactor));
+                        var bot = proj.fromPointToLatLng(new google.maps.Point((coord.x + 1) * 256 / zfactor, (coord.y + 1) * 256 / zfactor));
+
+                        //corrections for the slight shift of the SLP (mapserver)
+                        var deltaX = 0.0013;
+                        var deltaY = 0.00058;
+                        //create the Bounding box string
+                        var bbox =     (top.lng() + deltaX) + "," +
+    	                               (bot.lat() + deltaY) + "," +
+    	                               (bot.lng() + deltaX) + "," +
+    	                               (top.lat() + deltaY);
+                        //base WMS URL
+                        geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
+                        geoserverUrl +='&env=first_q:'+result[1]+
+                       	';second_q:'+result[2]+';third_q:'+result[3]+';fourth_q:'+result[4]+
+                       	';fifth_q:'+result[5];
+						geoserverUrl += "&REQUEST=GetMap";
+                        geoserverUrl += "&SERVICE=WMS";    //WMS service
+                        geoserverUrl += "&VERSION=1.1.1";  //WMS version  
+						geoserverUrl += "&STYLES=feedfinder-review-all-sld";//WMS version  
+                        geoserverUrl += "&LAYERS=" + "cite:counties"; //WMS layers
+                        geoserverUrl += "&FORMAT=image/png" ; //WMS format
+                        geoserverUrl += "&TRANSPARENT=TRUE";
+                        geoserverUrl += "&SRS=EPSG:4326";     //set WGS84 
+                        geoserverUrl += "&BBOX=" + bbox;      // set bounding box
+                        geoserverUrl += "&WIDTH=256";         //tile size in google
+                        geoserverUrl += "&HEIGHT=256"
+
+                        return geoserverUrl;                 // return URL for the tile
+
+                    },
+                    tileSize: new google.maps.Size(256, 256),
+                    isPng: true
+                });
+
+	 map.overlayMapTypes.push(choroplethMap);
+  	console.log(choroplethMap);
+}
 
 /*
 Loop over an array of objects and return the object that contains the nameKey

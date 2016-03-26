@@ -23,8 +23,8 @@ class DashboardsController extends AppController
         'User',
         //postgre geospatial tables
         'AdminOne',
-        'UkAdminThree',
-        'World'
+        'County',
+        'Soa'
         );
 
     // index page action
@@ -47,8 +47,26 @@ class DashboardsController extends AppController
             $query = $this->request->query;
             $model = $query['category']['model'];
             $result = $this->$model->route($query);
-            echo json_encode($result);
+            $json = array('request' => $query, 'result'=>$result);
+            echo json_encode($json);
         }
     }
 
+    public function map_click()
+    {
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) {
+            $this->disableCache();
+            $this->layout = null;
+            //get the sent 
+            $query = $this->request->query;
+            $model = $query['model'];
+            $result = $this->$model->getFeatureInfo($query);
+            if(empty($result)){
+                $result = array($query['model']=>array($query['pg_column'] => 0));
+            }
+            echo json_encode($result);
+            exit;
+        }
+    }
 }
