@@ -19,7 +19,7 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 	//{name: timeArr[3], range:getDateRange(timeArr[3])}, //last week
 	{name: timeArr[4], range:getDateRange(timeArr[4]), attr_name:'_this_month'}, //this month
 	//{name: timeArr[5], range:getDateRange(timeArr[5])}, //last month
-	{name: timeArr[6], range:getDateRange(timeArr[6]), attr_name:'_three_months'}, //last 3 months
+	{name: timeArr[6], range:getDateRange(timeArr[6]), attr_name:'_three_month'}, //last 3 months
 	{name: timeArr[7], range:getDateRange(timeArr[7]), attr_name:'_six_month'}, //last 6 months
 	{name: timeArr[8], range:getDateRange(timeArr[8]), attr_name:'_this_year'}, //this year
 	{name: timeArr[9], range:getDateRange(timeArr[9]), attr_name:'_all'} //all

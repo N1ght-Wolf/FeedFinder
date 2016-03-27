@@ -22,7 +22,6 @@ class DashboardsController extends AppController
         'Review',
         'User',
         //postgre geospatial tables
-        'AdminOne',
         'County',
         'Soa'
         );
@@ -59,6 +58,8 @@ class DashboardsController extends AppController
             $this->disableCache();
             $this->layout = null;
             //get the sent 
+            $date = date('Y-m-d H:i:s', strtotime("January this year"));
+            print_r($date);
             $query = $this->request->query;
             $model = $query['model'];
             $result = $this->$model->getFeatureInfo($query);

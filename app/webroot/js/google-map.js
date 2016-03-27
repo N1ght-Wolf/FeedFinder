@@ -37,7 +37,6 @@ function initMap() {
 				pg_column:pg_column
 			},
 			success: function (result){
-				console.log(result);
 				var infowindow = new google.maps.InfoWindow({
 					content: result.County.review_all+" "+query.category.name+'s'
 				});
