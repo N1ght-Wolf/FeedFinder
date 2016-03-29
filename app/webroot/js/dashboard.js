@@ -5,6 +5,7 @@ $(document).ready(function() {
 });
 
 feedfinder.controller('sidebarSelectController',function($scope, $http){
+	$scope.loading=false;
 	$scope.categories = [
 	{name: 'User', model: 'User'},
 	{name: 'Venue', model: 'Venue'},
@@ -30,36 +31,44 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 	{name: 'Super Output Area (UK)', groupBy:'Venue.soa_id',pg_table:'Soa'}
 	];
 
-	$scope.selectedTime = {name: timeArr[9], range:getDateRange(timeArr[9]), attr_name:'_all'};
-	$scope.selectedCategory = {name: 'Review', model: 'Review'};
+	$scope.selectedTime = 	{name: timeArr[7], range:getDateRange(timeArr[7]), attr_name:'_six_month'};
+	$scope.selectedCategory = 	{name: 'Review', model: 'Review'};
 	$scope.selectedExplore = {name: 'County', groupBy:'Venue.county_id',pg_table:'County'};
 
 		/*watch all of the select fields, when they change make an ajax request
 		[categories,times,explore]
 		*/
-		$scope.$watchCollection('[selectedCategory.name, selectedTime.name, selectedExplore.name]', function(newValues){
-			var selectedCategory = search(newValues[0], $scope.categories);
-			var selectedTime = search(newValues[1], $scope.times);		
-			var selectedExplore = search(newValues[2], $scope.explore);
+	$scope.$watchCollection('[selectedCategory.name, selectedTime.name, selectedExplore.name]', function(newValues){
+	//delete all the markers
+	deleteMarkers();
+	//remove the choropleth map overlay
+	if(map !=null){
+		map.overlayMapTypes.clear();
+	}
+	var selectedCategory = search(newValues[0], $scope.categories);
+	var selectedTime = search(newValues[1], $scope.times);		
+	var selectedExplore = search(newValues[2], $scope.explore);
 
-			query = {
-				category:selectedCategory,
-				time:selectedTime,
-				explore:selectedExplore
-			}
-			console.log(query);
-			$.ajax({
-				type: 'GET',
-				dataType: 'json',
-				url: url()+'/map_query',
-				data:query,
-				success: function (result){
-					queryCallBack(result);
-				},
-				error: function (jqXHR, textStatus, errorThrown) {
-				}
-			});
-		});
+	query = {
+		category:selectedCategory,
+		time:selectedTime,
+		explore:selectedExplore
+	}
+	$.ajax({
+		type: 'GET',
+		dataType: 'json',
+		url: url()+'/map_query',
+		data:query,
+		beforeSend: function(){
+		},
+		success: function (result){
+			console.log(result);
+			queryCallBack(result);
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+		}
+	});
+});
 
 	});
 
@@ -67,22 +76,24 @@ function queryCallBack(result){
 	var name = result.request.category.name;
 	switch (name){
 		case 'Venue':
-			deleteMarkers();
-			displayMarkers(result.result);
-			break;
+		displayMarkers(result.result.time_range);
+		getChoroplethMap(result.result.interq);
+		break;
 		default:
-			deleteMarkers();
-			getChoroplethMap(result.result);
-			break;
+		console.log(result.result);
+		getChoroplethMap(result.result);
+		break;
 
 	}
 }
 
-function getChoroplethMap(result){
+function getChoroplethMap(interq){
+	var quartiles = interq.quartiles;
+	console.log(quartiles);
 	choroplethMap = new google.maps.ImageMapType({
-                    getTileUrl: function (coord, zoom) {
-                        var proj = map.getProjection();
-                        var zfactor = Math.pow(2, zoom);
+		getTileUrl: function (coord, zoom) {
+			var proj = map.getProjection();
+			var zfactor = Math.pow(2, zoom);
                         // get Long Lat coordinates
                         var top = proj.fromPointToLatLng(new google.maps.Point(coord.x * 256 / zfactor, coord.y * 256 / zfactor));
                         var bot = proj.fromPointToLatLng(new google.maps.Point((coord.x + 1) * 256 / zfactor, (coord.y + 1) * 256 / zfactor));
@@ -92,19 +103,18 @@ function getChoroplethMap(result){
                         var deltaY = 0.00058;
                         //create the Bounding box string
                         var bbox =     (top.lng() + deltaX) + "," +
-    	                               (bot.lat() + deltaY) + "," +
-    	                               (bot.lng() + deltaX) + "," +
-    	                               (top.lat() + deltaY);
+                        (bot.lat() + deltaY) + "," +
+                        (bot.lng() + deltaX) + "," +
+                        (top.lat() + deltaY);
                         //base WMS URL
                         geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
-                        geoserverUrl +='&env=first_q:'+result[1]+
-                       	';second_q:'+result[2]+';third_q:'+result[3]+';fourth_q:'+result[4]+
-                       	';fifth_q:'+result[5];
-						geoserverUrl += "&REQUEST=GetMap";
+                        geoserverUrl +='&env=first_q:'+quartiles[1]+
+						';second_q:'+quartiles[2]+';third_q:'+quartiles[3]+';fourth_q:'+quartiles[4]+';fifth_q:'+quartiles[5];
+                        geoserverUrl += "&REQUEST=GetMap";
                         geoserverUrl += "&SERVICE=WMS";    //WMS service
                         geoserverUrl += "&VERSION=1.1.1";  //WMS version  
-						geoserverUrl += "&STYLES=feedfinder-review-all-sld";//WMS version  
-                        geoserverUrl += "&LAYERS=" + "cite:counties"; //WMS layers
+						geoserverUrl += "&STYLES="+interq.style;//WMS version  
+                        geoserverUrl += "&LAYERS=" + "cite:"+interq.layer; //WMS layers
                         geoserverUrl += "&FORMAT=image/png" ; //WMS format
                         geoserverUrl += "&TRANSPARENT=TRUE";
                         geoserverUrl += "&SRS=EPSG:4326";     //set WGS84 
@@ -118,9 +128,8 @@ function getChoroplethMap(result){
                     tileSize: new google.maps.Size(256, 256),
                     isPng: true
                 });
-
-	 map.overlayMapTypes.push(choroplethMap);
-  	console.log(choroplethMap);
+	map.overlayMapTypes.push(choroplethMap);
+	console.log(choroplethMap);
 }
 
 /*

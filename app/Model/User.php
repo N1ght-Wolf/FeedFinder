@@ -15,74 +15,31 @@ class User extends Model {
   var $name = 'User';
   var $hasMany = 'Review';
 
-
-  public function getUserFirstLocation($data){
-    $from = $data['from'];
-    $to = $data['to'];
-
-    $conditions = array('User.created >=' => $from,
-                        'User.created <=' => $to);
-    $fields = array('Review.venue_id','MIN(Review.created)');
-    $group = array('Review.user_id');
-
-    $results = $this->find('all', array(
-      'conditions'=>$conditions,
-      'fields'=>$fields,
-      'group'=>$group
-    ));
-    
-    return $result;
+  public function route($query){
+    return $this->calculateInterquartile($query);
   }
 
+ public function calculateInterquartile($query){
+        $Model = $AnotherModel = ClassRegistry::init($query['explore']['pg_table']);
+        $quartile = array();
+        $category =strtolower($query['category']['name']);
+        $attr_name = $query['time']['attr_name'];
+        //e.g. venue_all
+        $column = $category.$attr_name;
+        $results = $Model->query("select $column, ntile(5) over (order by $column) as quartile from counties group by $column order by $column desc");
+        
+        foreach ($results as $result => $value) {
+             $q = $value['0']['quartile'];
+            if (!array_key_exists($q, $quartile)){
+                $quartile[$q] = $value['0'][$column];
+            }
+        }
 
-  public function getTotalUsers($data){
-    $from = $data['from'];
-    $to = $data['to'];
+        $style='feedfinder_'.strtolower($query['category']['name']).$query['time']['attr_name'].'_sld';
 
-    $conditions = array('User.created >=' => $from,
-                        'User.created <=' => $to);
-
-    return $this->find('count',array('conditions' => $conditions));
-
-  }
-
-  public function getActiveUsers($data){
-    //an active user is a user that has at least on review
-    $from = $data['from-date'];
-    $to = $data['to-date'];
-    $action = $data['action'];
-    $Review = new Review();
-
-    return $Review->getDistinctUserReview($data);
-  }
-
-  public function getUserGraphData($data){
-    $from = $data['from-date'];
-    $to = $data['to-date'];
-
-    $conditions = array('User.created >=' => $from,
-                        'User.created <=' => $to);
-    
-    $fields = array('UNIX_TIMESTAMP(User.created) * 1000 AS timestamp','COUNT(User.created) AS mycount');
-    $group = array('YEAR(User.created)', 'MONTH(User.created)', 'DAY(User.created)');
-
-    $results = $this->find('all',array(
-      'conditions'=>$conditions,
-      'fields'=>$fields,
-      'group'=>$group
-    ));
-
-    $final_array = array();
-
-    foreach ($results as $result => $value) {
-      $timestamp = floatval($value[0]['timestamp']);
-      $count = intval($value[0]['mycount']);
-      $some_arr = array($timestamp,$count);
-      $final_array[] = $some_arr;
+        return array('quartiles'=>$quartile,'style'=>$style,'layer'=>$Model->table);
     }
-    return $final_array;
 
-  }
 
 }
 

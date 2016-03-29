@@ -67,8 +67,17 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 </div>
 </div>
 
+<md-progress-circular md-mode="indeterminate" md-diameter="90" id='prog-element' ng-show="isLoading" ></md-progress-circular>
 
-<div id="map"></div>
 
+<div id="map">
+</div>
+
+<style>
+   #prog-element { position: absolute; left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto; }
+</style>
 
 

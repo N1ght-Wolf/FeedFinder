@@ -38,7 +38,7 @@ function initMap() {
 			},
 			success: function (result){
 				var infowindow = new google.maps.InfoWindow({
-					content: result.County.review_all+" "+query.category.name+'s'
+					content: result.County[Object.keys(result.County)[0]]+" "+query.category.name+'s'
 				});
 
 				layerMarker = new google.maps.Marker({
@@ -66,7 +66,7 @@ function displayMarkers(venueResult){
 		infoText = generateHtmlMarkup(venue);
 		review = venueResult[i]['Review'];
 		latLng = new google.maps.LatLng(venue.latitude,venue.longitude);
-		marker = new google.maps.Marker({'position': latLng,map:map,animation: google.maps.Animation.DROP});
+		marker = new google.maps.Marker({'position': latLng,map:map});
 		delete venue.latitude;
 		google.maps.event.addListener(marker, 'click', (function(marker, infoText) {
 			return function() {

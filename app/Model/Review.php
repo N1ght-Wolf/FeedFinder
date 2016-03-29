@@ -4,6 +4,7 @@ App::uses('Model', 'Model');
 App::uses('County', 'Model');
 
 
+
 /**
  * Application model for Cake.
  *
@@ -20,23 +21,26 @@ class Review extends Model
         return $this->calculateInterquartile($query);
     }
 
+ 
     public function calculateInterquartile($query){
-        $County = new County();
+        $Model = $AnotherModel = ClassRegistry::init($query['explore']['pg_table']);
         $quartile = array();
-        $results = $County->find('all', array(
-            'fields' => array('County.review_all', 'ntile(5) over (order by "review_all") as quartile'),
-            'group' => 'County.review_all',
-            'order' => 'County.review_all DESC',
-        ));
-
+        $category =strtolower($query['category']['name']);
+        $attr_name = $query['time']['attr_name'];
+        //e.g. venue_all
+        $column = $category.$attr_name;
+        $results = $Model->query("select $column, ntile(5) over (order by $column) as quartile from counties group by $column order by $column desc");
+        
         foreach ($results as $result => $value) {
-            $q = $value[0]['quartile'];
-            if (!array_key_exists($q, $quartile)) {
-                $quartile[$q] = $value['County']['review_all'];
+             $q = $value['0']['quartile'];
+            if (!array_key_exists($q, $quartile)){
+                $quartile[$q] = $value['0'][$column];
             }
         }
-        return $quartile;
-    }
+        
+        $style='feedfinder_'.strtolower($query['category']['name']).$query['time']['attr_name'].'_sld';
 
+        return array('quartiles'=>$quartile,'style'=>$style,'layer'=>$Model->table);
+    }
 
 }
