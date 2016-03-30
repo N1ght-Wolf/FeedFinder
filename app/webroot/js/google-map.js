@@ -5,6 +5,7 @@ var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms?';
 var choroplethMap;
 var layerMarker;
 
+
 $(document).ready(function() {
 
 });
@@ -37,18 +38,32 @@ function initMap() {
 				pg_column:pg_column
 			},
 			success: function (result){
-				var infowindow = new google.maps.InfoWindow({
-					content: result.County[Object.keys(result.County)[0]]+" "+query.category.name+'s'
+				console.log(result);
+				var obj = result[Object.keys(result)[0]];
+				var count = obj[Object.keys(obj)[0]];
+				var infoWindow = new google.maps.InfoWindow({
+					content: count+" "+query.category.name+'s'
 				});
-
+var image = {
+    url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+    // This marker is 20 pixels wide by 32 pixels high.
+    size: new google.maps.Size(20, 32),
+    // The origin for this image is (0, 0).
+    origin: new google.maps.Point(0, 0),
+    // The anchor for this image is the base of the flagpole at (0, 32).
+    anchor: new google.maps.Point(0, 32)
+  };
 				layerMarker = new google.maps.Marker({
 					position: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng()),
 					map: map,
+					icon: image,
 					animation: google.maps.Animation.DROP,
 				});
+				
 				layerMarker.addListener('click', function() {
-					infowindow.open(map, layerMarker);
-				});
+					infoWindow.open(map, layerMarker);
+				});    
+
 			},
 			error: function (jqXHR, textStatus, errorThrown) {
 			}

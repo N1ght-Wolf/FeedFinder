@@ -65,14 +65,14 @@ class Venue extends Model
         //e.g. venue_all
         $column = $category.$attr_name;
         $results = $Model->query("select $column, ntile(5) over (order by $column) as quartile from counties group by $column order by $column desc");
-
+        
         foreach ($results as $result => $value) {
              $q = $value['0']['quartile'];
             if (!array_key_exists($q, $quartile)){
                 $quartile[$q] = $value['0'][$column];
             }
         }
-        
+
         $style='feedfinder_'.strtolower($query['category']['name']).$query['time']['attr_name'].'_sld';
 
         return array('quartiles'=>$quartile,'style'=>$style,'layer'=>$Model->table);

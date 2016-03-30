@@ -1,13 +1,13 @@
 <?php 
 class updateCountyShell extends AppShell {
-	public $uses = array('County');
+	public $uses = array('County','Soa');
 
 	public function updateCounty(){
 		$result = $this->County->update();
 	}
 
-	public function updateSoa(){
-
+	public function updateSuperOutArea(){
+		$this->Soa->update();
 	}
 
 	public function updateVenueCounty(){
