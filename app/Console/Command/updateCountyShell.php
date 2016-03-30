@@ -16,3 +16,4 @@ class updateCountyShell extends AppShell {
 }
 
 ?>
+//cd /Applications/MAMP/htdocs/FeedFinder/app && Console/cake updateCounty updateVenueCounty

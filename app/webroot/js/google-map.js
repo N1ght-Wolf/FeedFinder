@@ -12,8 +12,8 @@ $(document).ready(function() {
 
 function initMap() {
 	map = new google.maps.Map(document.getElementById("map"), {
-		center: new google.maps.LatLng(51.2, 7),
-		zoom: 5,
+		center: new google.maps.LatLng(54.2, -1.7),
+		zoom: 6,
 		zoomControl: true,
 		zoomControlOptions: {
 			position: google.maps.ControlPosition.TOP_RIGHT
@@ -44,26 +44,26 @@ function initMap() {
 				var infoWindow = new google.maps.InfoWindow({
 					content: count+" "+query.category.name+'s'
 				});
-var image = {
-    url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
-    // This marker is 20 pixels wide by 32 pixels high.
-    size: new google.maps.Size(20, 32),
-    // The origin for this image is (0, 0).
-    origin: new google.maps.Point(0, 0),
-    // The anchor for this image is the base of the flagpole at (0, 32).
-    anchor: new google.maps.Point(0, 32)
-  };
+
+			var image = {
+			    url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+			    // This marker is 20 pixels wide by 32 pixels high.
+			    size: new google.maps.Size(20, 32),
+			    // The origin for this image is (0, 0).
+			    origin: new google.maps.Point(0, 0),
+			    // The anchor for this image is the base of the flagpole at (0, 32).
+			    anchor: new google.maps.Point(0, 32)
+			  };
+
 				layerMarker = new google.maps.Marker({
 					position: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng()),
 					map: map,
 					icon: image,
 					animation: google.maps.Animation.DROP,
 				});
-				
 				layerMarker.addListener('click', function() {
 					infoWindow.open(map, layerMarker);
 				});    
-
 			},
 			error: function (jqXHR, textStatus, errorThrown) {
 			}

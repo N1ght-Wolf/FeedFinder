@@ -1,7 +1,8 @@
 var categories, times, explore,query;
 
 $(document).ready(function() {
-	var sidebar = $('#sidebar').sidebar().open('home');
+	var sidebar = $('#sidebar').sidebar();
+	//.open('home');
 });
 
 feedfinder.controller('sidebarSelectController',function($scope, $http){
@@ -62,7 +63,6 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 		beforeSend: function(){
 		},
 		success: function (result){
-			console.log(result);
 			queryCallBack(result);
 		},
 		error: function (jqXHR, textStatus, errorThrown) {
@@ -114,7 +114,7 @@ function getChoroplethMap(interq){
                         geoserverUrl += "&SERVICE=WMS";    //WMS service
                         geoserverUrl += "&VERSION=1.1.1";  //WMS version  
 						geoserverUrl += "&STYLES="+interq.style;//WMS version  
-                        geoserverUrl += "&LAYERS=" + "cite:"+interq.layer; //WMS layers
+                        geoserverUrl += "&LAYERS=" + "nurc:"+interq.layer; //WMS layers
                         geoserverUrl += "&FORMAT=image/png" ; //WMS format
                         geoserverUrl += "&TRANSPARENT=TRUE";
                         geoserverUrl += "&SRS=EPSG:4326";     //set WGS84 
