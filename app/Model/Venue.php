@@ -32,7 +32,9 @@ class Venue extends Model
         $conditions = array(
             'Venue.flag' => 0,
             'Venue.created >=' => $from,
-            'Venue.created <=' => $to
+            'Venue.created <=' => $to,
+            'Venue.county_id IS NOT NULL',
+            'Venue.soa_id IS NOT NULL'
             );
 
         return $this->find('all', array(
