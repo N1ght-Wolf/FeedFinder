@@ -18,7 +18,7 @@ class Venue extends Model
     public function route($query){
         $timeRange = $this->getVenuesInTimeRange($query);
         $interq = $this->calculateInterquartile($query);
-        $result = array('time_range'=>$timeRange,'interq'=>$interq);
+        $result = array("time_range"=>$timeRange,"interq"=>$interq);
         return $result;
     }
     /*
@@ -65,7 +65,7 @@ class Venue extends Model
         //e.g. venue_all
         $column = $category.$attr_name;
         $results = $Model->query("select $column, ntile(5) over (order by $column) as quartile from counties group by $column order by $column desc");
-        
+
         foreach ($results as $result => $value) {
              $q = $value['0']['quartile'];
             if (!array_key_exists($q, $quartile)){
@@ -73,9 +73,9 @@ class Venue extends Model
             }
         }
 
-        $style='feedfinder_'.strtolower($query['category']['name']).$query['time']['attr_name'].'_sld';
+        $style="feedfinder_".strtolower($query["category"]["name"]).$query["time"]["attr_name"]."_sld";
 
-        return array('quartiles'=>$quartile,'style'=>$style,'layer'=>$Model->table);
+        return array("quartiles"=>$quartile,"style"=>$style,"layer"=>$Model->table);
     }
 
 }
