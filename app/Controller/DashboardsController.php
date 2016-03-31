@@ -51,6 +51,7 @@ class DashboardsController extends AppController
             $result = array("result"=>$result);
             $val = json_encode($result);
             print_r($val);
+            print_r('lol');
             echo($val);
             exit;
         }
