@@ -50,8 +50,6 @@ class DashboardsController extends AppController
             header('Content-type: application/json');
             $result = array("result"=>$result);
             $val = json_encode($result);
-            print_r($result);
-            print_r('lol');
             echo($val);
             exit;
         }
