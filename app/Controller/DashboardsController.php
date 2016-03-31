@@ -49,6 +49,7 @@ class DashboardsController extends AppController
             //$json = array("request" => $query, "result"=>$result);
             $json = array("a"=>$result);
             echo json_encode($json);
+            print_r($result);
             exit;
         }
     }
