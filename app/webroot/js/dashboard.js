@@ -32,7 +32,7 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 	{name: 'Super Output Area (UK)', groupBy:'Venue.soa_id',pg_table:'Soa'}
 	];
 
-	$scope.selectedTime = 	{name: timeArr[7], range:getDateRange(timeArr[7]), attr_name:'_six_month'};
+	$scope.selectedTime = 	{name: timeArr[6], range:getDateRange(timeArr[6]), attr_name:'_three_month'};
 	$scope.selectedCategory = 	{name: 'Venue', model: 'Venue'};
 	$scope.selectedExplore = {name: 'County', groupBy:'Venue.county_id',pg_table:'County'};
 
