@@ -48,7 +48,7 @@ class DashboardsController extends AppController
             $result = $this->$model->route($query);
             $json = array("request" => $query, "result"=>$result);
             echo json_encode($json);
-            exit
+            exit;
         }
     }
 
