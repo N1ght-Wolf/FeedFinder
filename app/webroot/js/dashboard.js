@@ -66,7 +66,6 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 			queryCallBack(result);
 		},
 		error: function (jqXHR, textStatus, errorThrown) {
-			console.log(error);
 			console.log(jqXHR);
 			console.log(textStatus);
 			console.log(errorThrown);
