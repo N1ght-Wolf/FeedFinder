@@ -47,7 +47,6 @@ class DashboardsController extends AppController
             $model = $query['category']['model'];
             $result = $this->$model->route($query);
             $json = array('request' => $query, 'result'=>$result);
-            print_r($json);
             echo json_encode($json);
         }
     }
