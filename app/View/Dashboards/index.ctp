@@ -19,14 +19,12 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 ?>
 
 <div id="sidebar" class="sidebar collapsed">
-    <!-- Nav tabs -->
     <div class="sidebar-tabs">
         <ul role="tablist">
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
         </ul>
     </div>
 
-    <!-- Tab panes -->
     <div class="sidebar-content">
         <div class="sidebar-pane" id="home">
             <h1 class="sidebar-header">
@@ -34,22 +32,25 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
                 <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
             </h1>
 
-    <form name="myForm" ng-controller="sidebarSelectController" form-on-change="change()">
+    <form name="myForm" ng-controller="sidebarSelectController" layout="column">
 
-        <div>
+          <md-content layout-padding>
         <md-input-container class="md-block">
             <label>Category</label>
             <md-select ng-model="selectedCategory.name">
             <md-option ng-value="category.name" ng-repeat="category in categories">{{ category.name }}</md-option>
             </md-select>
         </md-input-container>
-
+                </md-content>
+                          <md-content layout-padding>
         <md-input-container class="md-block">
             <label>Time</label>
             <md-select ng-model="selectedTime.name">
-            <md-option ng-value="time.name" ng-repeat="time in times" style="z-index:2001px;">{{ time.name }}</md-option>
+            <md-option ng-value="time.name" ng-repeat="time in times" >{{ time.name }}</md-option>
             </md-select>
         </md-input-container>
+        </md-content>
+                  <md-content layout-padding>
 
         <md-input-container class="md-block">
             <label>Explore</label>
@@ -57,7 +58,7 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
             <md-option ng-value="ex.name" ng-repeat="ex in explore">{{ ex.name }}</md-option>
             </md-select>
         </md-input-container>
-        </div>
+        </md-content>
     </form>
 
 
@@ -66,6 +67,7 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 
 </div>
 </div>
+
 
 <!-- <md-progress-circular md-mode="indeterminate" md-diameter="90" id='prog-element' ></md-progress-circular> -->
 
@@ -77,7 +79,8 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
    #prog-element { position: absolute; left: 0;
     right: 0;
     margin-left: auto;
-    margin-right: auto; }
+    margin-right: auto;
+    z-index: 99; }
 </style>
 
 
