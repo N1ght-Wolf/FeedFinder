@@ -18,7 +18,7 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 
 ?>
 
-<div id="sidebar" class="sidebar collapsed">
+<div id="sidebar" class="sidebar collapsed" id="prog-element">
     <div class="sidebar-tabs">
         <ul role="tablist">
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
@@ -76,11 +76,15 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 </div>
 
 <style>
-   #prog-element { position: absolute; left: 0;
+/*   #prog-element { position: absolute; left: 0;
     right: 0;
     margin-left: auto;
     margin-right: auto;
-    z-index: 99; }
+    z-index: 99; */}
+    #prog-element{
+        top: 50px;
+    }
+
 </style>
 
 

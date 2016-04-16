@@ -1,11 +1,14 @@
 <?php
 echo $this->Html->script('venue', array('inline' => false));
 echo $this->Html->script('url.min', array('inline' => false));
+
 ?>
-<md-content layout-padding>
-    <div layout="column" ng-controller='VenueController' layout-align="center center" flex="grow">
+<md-content layout-align="layout-padding layout-margin layout-fill style">
+
+    <div layout="column" ng-controller='VenueController' flex="70" layout-align="center center">
         <!--    statistics of the venue div-->
-            <md-card >
+        <div flex="70">
+            <md-card>
                 <img ng-src="http://i.imgur.com/XQRoQYN.jpg?1" class="md-image" alt="Washed Out">
                 <md-card-title>
                     <md-card-title-text>
@@ -19,12 +22,10 @@ echo $this->Html->script('url.min', array('inline' => false));
                 <md-card-content></md-card-content>
                 <md-card-actions layout="column" layout-align="start">
                     <div layout="row" flex>
-
                         <div>
                             <md-subheader class="md-no-sticky">From</md-subheader>
                             <md-datepicker ng-model="fromDate" md-placeholder="From Date"></md-datepicker>
                         </div>
-
                         <div>
                             <md-subheader class="md-no-sticky">To</md-subheader>
                             <md-datepicker ng-model="toDate" md-placeholder="To date"></md-datepicker>
@@ -32,17 +33,26 @@ echo $this->Html->script('url.min', array('inline' => false));
                     </div>
                 </md-card-actions>
             </md-card>
+        </div>
 
+
+        <md-content style="height: 600px;">
+            <md-subheader class="md-primary ">Reviews</md-subheader>
             <section class="md-whiteframe-z1">
                 <md-list-item class="md-3-line " ng-repeat="review in venueReviews" ng-click="null">
                     <ng-letter-avatar height="60" width="60" data="{{review.User.username}}" avatarborder="true"
                                       shape="round"></ng-letter-avatar>
                     <div class="md-list-item-text">
-                        <h3>{{review.User.username}}</h3>
-                        <p>{{ review.Review.review_text }}<p>
+                        <!--                                <b>{{review.User.username}}</b>-->
+                        <jk-rating-stars class="my-custom-stars" rating="review.Review.average_rating"
+                                         read-only="readOnly"></jk-rating-stars>
+                        <p>{{ review.Review.review_text }}
+                        <p>
                     </div>
                 </md-list-item>
             </section>
+        </md-content>
+
     </div>
 </md-content>
 

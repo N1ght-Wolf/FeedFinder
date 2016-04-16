@@ -1,5 +1,3 @@
-<div ng-controller="navbarController" ng-cloak>
-  <md-content>
     <md-toolbar>
       <div class="md-toolbar-tools">
         <h2>
@@ -20,7 +18,5 @@
         </md-button>
       </div>
     </md-toolbar>
-  </md-content>
-</div>
 
     

@@ -33,7 +33,7 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 	];
 
 	$scope.selectedTime = 	{name: timeArr[6], range:getDateRange(timeArr[6]), attr_name:'_three_month'};
-	$scope.selectedCategory = 	{name: 'Review', model: 'Review'};
+	$scope.selectedCategory = 	{name: 'Venue', model: 'Venue'};
 	$scope.selectedExplore = {name: 'County', groupBy:'Venue.county_id',pg_table:'County'};
 
 		/*watch all of the select fields, when they change make an ajax request

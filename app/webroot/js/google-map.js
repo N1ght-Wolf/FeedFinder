@@ -7,7 +7,8 @@ var layerMarker;
 
 
 $(document).ready(function() {
-
+	// console.log(url(1));
+	console.log(url('hostname')+'/'+url(1)+'/venues');	
 });
 
 function initMap() {
@@ -80,6 +81,7 @@ function displayMarkers(venueResult){
 		//check if there are any venues in the result
 		venue = venueResult[i]['Venue'];
 		infoText = generateHtmlMarkup(venue);
+		infoText += "<a target='_blank'href=venues/?id="+venue.id+">Visit</a>";
 		review = venueResult[i]['Review'];
 		latLng = new google.maps.LatLng(venue.latitude,venue.longitude);
 		marker = new google.maps.Marker({'position': latLng,map:map});

@@ -43,4 +43,12 @@ class Review extends Model
         return array('quartiles'=>$quartile,'style'=>$style,'layer'=>$Model->table);
     }
 
+    public function getVenueReviews($query){
+        $id = $query['id'];
+        print_r($id);
+        return $this->find('all',array(
+            'conditions'=>array('Review.venue_id'=>$id)
+            ));
+    }
+
 }

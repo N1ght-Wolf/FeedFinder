@@ -40,7 +40,6 @@ class DashboardsController extends AppController
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            $this->disableCache();
             $this->layout = null;
             //get the sent 
             $query = $this->request->query;
@@ -57,7 +56,6 @@ class DashboardsController extends AppController
     {
         $this->autoRender = false;
         if ($this->request->is('ajax')) {
-            $this->disableCache();
             $this->layout = null;
             //get the sent 
             $query = $this->request->query;
