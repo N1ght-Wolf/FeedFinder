@@ -16,7 +16,7 @@ $(document).ready(function () {
 feedfinder.controller('VenueController', function ($scope, $http) {
     query.id = $.url('?id');
     $scope.query = query;
-    $scope.fromDate = new Date("July 21, 1983 01:15:00");
+    $scope.fromDate = new Date("January 1, 2013 00:00:00");
     $scope.toDate = new Date();
     $scope.query.from = $scope.fromDate.toISOString().substring(0, 19).replace('T', ' ');
     $scope.query.to = $scope.toDate.toISOString().substring(0, 19).replace('T', ' ');
