@@ -182,7 +182,7 @@ class County extends Model
                 echo "<pre>";
                 print_r($shapeId);
                 echo "</pre>";
-                $saveMany[] = array('Venue' =>array('id'=>$venueId,'county_id'=>$shapeId['County']['id']));
+                $saveMany[] = array('Venue' =>array('id'=>$venueId,'county_id'=>$shapeId['0']['County']['id']));
             }
         }
         //$Venue->saveMany($saveMany);
