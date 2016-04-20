@@ -23,6 +23,9 @@ class Venue extends Model
         //$interq = $this->calculateInterquartile($query);
         $result = array("time_range" => $timeRange);
             //"interq" => $interq);
+        echo "<pre>";
+        print_r($result);
+        echo "</pre>";
         return $result;
     }
 
