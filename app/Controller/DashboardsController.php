@@ -39,7 +39,7 @@ class DashboardsController extends AppController
     public function map_query()
     {
         $this->autoRender = false;
-        if ($this->request->is('ajax')) {
+//        if ($this->request->is('ajax')) {
             $this->layout = null;
             //get the sent 
             $query = $this->request->query;
@@ -52,8 +52,8 @@ class DashboardsController extends AppController
 //            echo "</pre>";
 //            header('Content-type: application/json');
             echo json_encode($result);
-            exit;
-        }
+//            exit;
+//        }
     }
 
     public function map_click()
