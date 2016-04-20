@@ -39,7 +39,7 @@ class Venue extends Model
             'Venue.created >=' => $from,
             'Venue.created <=' => $to,
             'Venue.county_id IS NOT NULL',
-            'Venue.soa_id IS NOT NULL'
+//            'Venue.soa_id IS NOT NULL'
         );
 
         return $this->find('all', array(
