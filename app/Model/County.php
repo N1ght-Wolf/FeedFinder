@@ -43,7 +43,7 @@ class County extends Model
     public function update(){
         $this->updateReview();
         $this->updateVenue();
-        $this->updateUser();
+        //$this->updateUser();
         $this->updateFriendliness();
     }
 
