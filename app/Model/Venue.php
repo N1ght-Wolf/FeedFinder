@@ -38,8 +38,7 @@ class Venue extends Model
             'Venue.flag' => 0,
             'Venue.created >=' => $from,
             'Venue.created <=' => $to,
-            'Venue.county_id  !=' => -1,
-            'limit' => 2
+            'Venue.county_id  !=' => -1
 //            'Venue.soa_id IS NOT NULL'
         );
 
