@@ -20,8 +20,9 @@ class Venue extends Model
     public function route($query)
     {
         $timeRange = $this->getVenuesInTimeRange($query);
-        $interq = $this->calculateInterquartile($query);
-        $result = array("time_range" => $timeRange, "interq" => $interq);
+        //$interq = $this->calculateInterquartile($query);
+        $result = array("time_range" => $timeRange);
+            //"interq" => $interq);
         return $result;
     }
 
