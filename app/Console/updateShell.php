@@ -1,5 +1,5 @@
 <?php 
-class updateCountyShell extends AppShell {
+class updateShell extends AppShell {
 	public $uses = array('County','Soa');
 
 	public function updateCounty(){
