@@ -50,7 +50,7 @@ class DashboardsController extends AppController
 //            print_r($json);
 //            echo "</pre>";
 //            header('Content-type: application/json');
-            echo json_encode($json);
+            echo json_encode(array('5'));
             exit;
         }
     }
