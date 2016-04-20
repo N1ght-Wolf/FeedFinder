@@ -180,7 +180,7 @@ class County extends Model
                 $saveMany[] =  array('Venue'=>array('id'=>$venueId,'county_id'=>-1));   
             }else{
                 echo "<pre>";
-                print_r($shapeId);
+                print_r($venueId);
                 echo "</pre>";
                 $saveMany[] = array('Venue' =>array('id'=>$venueId,'county_id'=>$shapeId['0']['County']['id']));
             }
