@@ -43,7 +43,7 @@ class County extends Model
     public function update(){
         $this->updateReview();
         $this->updateVenue();
-        //$this->updateUser();
+        $this->updateUser();
         $this->updateFriendliness();
     }
 
@@ -75,7 +75,8 @@ class County extends Model
         foreach ($this->venueColumn as $key => $value) {
             $conditions = array(
                 'Venue.created >=' => date('Y-m-d H:i:s', strtotime($value)),
-                'Venue.created <=' => date('Y-m-d H:i:s', strtotime('tomorrow -1 second')));
+                'Venue.created <=' => date('Y-m-d H:i:s', strtotime('tomorrow -1 second')),
+                'Venue.flag'=> 0);
             $results = $Venue->find('all', array(
             'fields'=>$fields,
             'conditions'=>$conditions,
@@ -89,8 +90,7 @@ class County extends Model
         $Review = new Review();
         $fields = array('Venue.county_id','count(*) as count');
         $group = array('Venue.county_id');
-        $conditions = array();
-
+        
         foreach ($this->userColumn as $key => $value) {
             $conditions = array(
                 'User.created >=' => date('Y-m-d H:i:s', strtotime($value)),

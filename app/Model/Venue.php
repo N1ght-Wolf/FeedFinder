@@ -20,9 +20,9 @@ class Venue extends Model
     public function route($query)
     {
         $timeRange = $this->getVenuesInTimeRange($query);
-        //$interq = $this->calculateInterquartile($query);
-        $result = array("time_range" => $timeRange);
-            //"interq" => $interq);
+        $interq = $this->calculateInterquartile($query);
+        $result = array("time_range" => $timeRange,
+            "interq" => $interq);
         return $result;
     }
 
@@ -32,14 +32,13 @@ class Venue extends Model
     public function getVenuesInTimeRange($query)
     {
         $from = $query['time']['range']['from'];
-        $to = $query['time']['range']['to'];
-
+        //$to = $query['time']['range']['to'];
+        //print_r(date('Y-m-d H:i:s', strtotime($from)));
         $conditions = array(
             'Venue.flag' => 0,
-            'Venue.created >=' => $from,
-            'Venue.created <=' => $to,
+            'Venue.created >=' => date('Y-m-d H:i:s', strtotime($from)),
+            'Venue.created <=' => date('Y-m-d H:i:s', strtotime('tomorrow -1 second')),
             'Venue.county_id  !=' => -1,
-            'Venue.county_id IS NOT NULL'
 //            'Venue.soa_id IS NOT NULL'
         );
 
@@ -51,6 +50,7 @@ class Venue extends Model
                 Venue.country,
                 Venue.postcode, 
                 Venue.created,
+                Venue.county_id,
                 Venue.latitude, Venue.longitude'),
             'conditions' => $conditions
         ));
@@ -75,17 +75,19 @@ class Venue extends Model
         //e.g. venue_all
         $column = $category . $attr_name;
         $results = $Model->query("select $column, ntile(5) over (order by $column) as quartile from counties group by $column order by $column desc");
-
-        foreach ($results as $result => $value) {
-            $q = $value['0']['quartile'];
-            if (!array_key_exists($q, $quartile)) {
-                $quartile[$q] = $value['0'][$column];
-            }
-        }
+//        echo "<pre>";
+//        print_r($results["0"]["0"][$column]);
+//        echo "</pre>";
+//        foreach ($results as $result => $value) {
+//            $q = $value['0']['quartile'];
+//            if (!array_key_exists($q, $quartile)) {
+//                $quartile[$q] = $value['0'][$column];
+//            }
+//        }
 
         $style = "feedfinder_" . strtolower($query["category"]["name"]) . $query["time"]["attr_name"] . "_sld";
 
-        return array("quartiles" => $quartile, "style" => $style, "layer" => $Model->table);
+        return array("quartiles" => $results["0"]["0"][$column], "style" => $style, "layer" => $Model->table);
     }
     /***Functions used by the Venues page **/
 

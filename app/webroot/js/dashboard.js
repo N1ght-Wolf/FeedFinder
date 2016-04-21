@@ -15,16 +15,16 @@ feedfinder.controller('sidebarSelectController',function($scope, $http){
 	];
 
 	$scope.times = [
-	{name: timeArr[0], range:getDateRange(timeArr[0]), attr_name:'_today'}, //today
+	{name: timeArr[0], range:{from:'today'}, attr_name:'_today'}, //today
 	//{name: timeArr[1], range:getDateRange(timeArr[1])}, //yesterday
-	{name: timeArr[2], range:getDateRange(timeArr[2]), attr_name:'_this_week'}, //this week
+	{name: timeArr[2], range:{from:'this week today'}, attr_name:'_this_week'}, //this week
 	//{name: timeArr[3], range:getDateRange(timeArr[3])}, //last week
-	{name: timeArr[4], range:getDateRange(timeArr[4]), attr_name:'_this_month'}, //this month
+	{name: timeArr[4], range:{from:'first day of this month today'}, attr_name:'_this_month'}, //this month
 	//{name: timeArr[5], range:getDateRange(timeArr[5])}, //last month
-	{name: timeArr[6], range:getDateRange(timeArr[6]), attr_name:'_three_month'}, //last 3 months
-	{name: timeArr[7], range:getDateRange(timeArr[7]), attr_name:'_six_month'}, //last 6 months
-	{name: timeArr[8], range:getDateRange(timeArr[8]), attr_name:'_this_year'}, //this year
-	{name: timeArr[9], range:getDateRange(timeArr[9]), attr_name:'_all'} //all
+	{name: timeArr[6], range:{from:'-3 month today'}, attr_name:'_three_month'}, //last 3 months
+	{name: timeArr[7], range:{from:'-6 month today'}, attr_name:'_six_month'}, //last 6 months
+	{name: timeArr[8], range:{from:'January this year'}, attr_name:'_this_year'}, //this year
+	{name: timeArr[9], range:{from:'2013-04-25 15:43:18'}, attr_name:'_all'} //all
 	];
 
 	$scope.explore = [
@@ -111,10 +111,9 @@ function getChoroplethMap(interq){
                         (bot.lng() + deltaX) + "," +
                         (top.lat() + deltaY);
                         //base WMS URL
-                        //geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
-                        geoserverUrl = "http://178.62.38.151:8080/geoserver/nurc/wms?";
-                        geoserverUrl +='&env=first_q:'+quartiles[1]+
-						';second_q:'+quartiles[2]+';third_q:'+quartiles[3]+';fourth_q:'+quartiles[4]+';fifth_q:'+quartiles[5];
+                        geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
+                        //geoserverUrl = "http://178.62.38.151:8080/geoserver/nurc/wms?";
+                        geoserverUrl +='&env=max:'+quartiles;
                         geoserverUrl += "&REQUEST=GetMap";
                         geoserverUrl += "&SERVICE=WMS";    //WMS service
                         geoserverUrl += "&VERSION=1.1.1";  //WMS version  
