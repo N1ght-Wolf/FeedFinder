@@ -97,7 +97,7 @@ class Venue extends Model
         return array(
             'venue_reviews' => $this->getVenueReviews($query),
             'venue_address' => $this->getVenueAddress($query),
-          //  'venue_ratings' => $this->getVenueRatings($query)
+          'venue_ratings' => $this->getVenueRatings($query)
         );
     }
 
@@ -127,6 +127,20 @@ class Venue extends Model
             'conditions' => array('Venue.id' => $query['id'])
         ));
     }
+    public function getVenueRatings($query){
+        $Review = new Review();
+        $Review->Behaviors->load('Containable');
+        $Review->contain();
+        return $Review->find('all',array(
+            'conditions' => array(
+                'Review.venue_id' => $query['id'],
+                'Review.created >=' => $query['from'],
+                'Review.created <=' => $query['to'],
+            ),
+            'fields'=>array(' (AVG(Review.q1)+AVG(Review.q2) +AVG(Review.q3)+AVG(Review.q4))/4 as venue_rate')
+        ));
+    }
+
 }
 
 

@@ -11,13 +11,12 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
                 <img ng-src="http://i.imgur.com/XQRoQYN.jpg?1" class="md-image" alt="Washed Out">
                 <md-card-title>
                     <md-card-title-text>
-                        <span class="md-headline">{{venueAddress.name}}</span>
+                        <span class="md-headline">{{venueAddress.name}}</span>   <input-stars readonly="readonly" ng-model="venueRating" max="5"></input-stars>
                         <span class="md-subhead">
                             {{venueAddress.city}} </br>
                             {{venueAddress.address}} </br>
                             {{venueAddress.name}} </br>
                             {{venueAddress.postcode}}
-
                         </span>
                     </md-card-title-text>
                 </md-card-title>
