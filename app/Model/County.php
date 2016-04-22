@@ -51,7 +51,6 @@ class County extends Model
         $Review = new Review();
         $fields = array('Venue.county_id','count(Review.review_text) as count');
         $group = array('Venue.county_id');
-        $conditions = array();
 
         foreach ($this->reviewColumn as $key => $value) {
             $conditions = array(
@@ -70,7 +69,6 @@ class County extends Model
         $Venue = new Venue();
         $fields = array('Venue.county_id','count(*) as count');
         $group = array('Venue.county_id');
-        $conditions = array();
 
         foreach ($this->venueColumn as $key => $value) {
             $conditions = array(
@@ -88,19 +86,25 @@ class County extends Model
 
     public function updateUser(){
         $Review = new Review();
-        $fields = array('Venue.county_id','count(*) as count');
         $group = array('Venue.county_id');
-        
-        foreach ($this->userColumn as $key => $value) {
-            $conditions = array(
-                'User.created >=' => date('Y-m-d H:i:s', strtotime($value)),
-                'User.created <=' => date('Y-m-d H:i:s', strtotime('tomorrow -1 second')));
+        $fields = array(
+            'COUNT(Venue.county_id) as count',
+            'MIN(Review.created)',
+            'Venue.county_id',
+            'Review.user_id',
+            'Venue.latitude','Venue.longitude'
+        );
 
+            foreach ($this->userColumn as $key => $value) {
+            $conditions = array(
+                'Review.created >=' => date('Y-m-d H:i:s', strtotime($value)),
+                'Review.created <=' => date('Y-m-d H:i:s', strtotime('tomorrow -1 second')));
             $results = $Review->find('all', array(
             'fields'=>$fields,
             'conditions'=>$conditions,
             'group'=>$group
           ));
+
         $this->updatePgTable($results, $key);
         }
 
@@ -179,9 +183,9 @@ class County extends Model
             if(empty($shapeId)){
                 $saveMany[] =  array('Venue'=>array('id'=>$venueId,'county_id'=>-1));   
             }else{
-                echo "<pre>";
-                print_r($venueId);
-                echo "</pre>";
+//                echo "<pre>";
+//                print_r($venueId);
+//                echo "</pre>";
                 $saveMany[] = array('Venue' =>array('id'=>$venueId,'county_id'=>$shapeId['0']['County']['id']));
             }
         }

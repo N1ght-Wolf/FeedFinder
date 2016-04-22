@@ -34,7 +34,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
     <!-- Angular Material Library -->
     <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
     <script src="https://rawgit.com/uttesh/ngletteravatar/master/ngletteravatar.js"></script>
-    <script src="https://rawgit.com/juank11memphis/angular-jk-rating-stars/master/dist/jk-rating-stars.min.js"></script>
+    <script src="https://rawgit.com/melloc01/angular-input-stars/master/angular-input-stars.js"></script>
 
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
     <link href="https://rawgit.com/juank11memphis/angular-jk-rating-stars/master/dist/jk-rating-stars.min.css" rel="stylesheet">

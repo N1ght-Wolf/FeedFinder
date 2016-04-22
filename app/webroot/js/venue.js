@@ -33,10 +33,11 @@ feedfinder.controller('VenueController', function ($scope, $http) {
             url: url('path') + '/venue_info',
             params: $scope.query
         }).success(function (result, status, headers, config) {
+            result.venue_reviews[0].Review.q1 = 5;
             $scope.venueAddress = result.venue_address.Venue;
             $scope.venueReviews = result.venue_reviews;
             $scope.secondRate = 3;
-            console.log($scope.venueReviews);
+            console.log($scope.venueReviews[0].Review.q1);
         }).error(function (data, status, headers, config) {
             $scope.status = status;
         });

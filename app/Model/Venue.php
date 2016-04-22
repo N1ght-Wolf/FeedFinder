@@ -69,25 +69,26 @@ class Venue extends Model
     public function calculateInterquartile($query)
     {
         $Model = $AnotherModel = ClassRegistry::init($query['explore']['pg_table']);
-        $quartile = array();
+        $quartile = array("1"=>0,"2"=>0,3=>0,4=>0,5=>0);
         $category = strtolower($query['category']['name']);
         $attr_name = $query['time']['attr_name'];
         //e.g. venue_all
         $column = $category . $attr_name;
-        $results = $Model->query("select $column, ntile(5) over (order by $column) as quartile from counties group by $column order by $column desc");
+        $results = $Model->query("select $column, ntile(5) over (order by $column) as quartile from counties WHERE $column > 0 group by $column order by $column desc");
 //        echo "<pre>";
 //        print_r($results["0"]["0"][$column]);
 //        echo "</pre>";
-//        foreach ($results as $result => $value) {
-//            $q = $value['0']['quartile'];
-//            if (!array_key_exists($q, $quartile)) {
-//                $quartile[$q] = $value['0'][$column];
-//            }
-//        }
+
+        foreach ($results as $result => $value) {
+            $q = $value['0']['quartile'];
+          //  if (!array_key_exists($q, $quartile)) {
+                $quartile[$q] = $value['0'][$column];
+           // }
+        }
 
         $style = "feedfinder_" . strtolower($query["category"]["name"]) . $query["time"]["attr_name"] . "_sld";
 
-        return array("quartiles" => $results["0"]["0"][$column], "style" => $style, "layer" => $Model->table);
+        return array("quartiles" => $quartile, "style" => $style, "layer" => $Model->table);
     }
     /***Functions used by the Venues page **/
 
@@ -105,11 +106,16 @@ class Venue extends Model
         $Review->Behaviors->load('Containable');
         $Review->contain('User');
         return $Review->find('all',array(
-            'conditions' => array(
+                'conditions' => array(
                 'Review.venue_id' => $query['id'],
                 'Review.created >=' => $query['from'],
                 'Review.created <=' => $query['to'],
-            )
+            ),
+            'fields'=>array('Review.id, 
+            Review.venue_id',
+                'Review.user_id',
+                'Review.q1','Review.q2','Review.q3','Review.q4','Review.review_text',
+                'Review.created',' (Review.q1+Review.q2+Review.q3+Review.q4)/4 as average_rate')
         ));
     }
 

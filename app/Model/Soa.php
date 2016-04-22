@@ -158,7 +158,7 @@ class Soa extends Model
         return $result;
     }
 
-    public function updateCountyId(){
+    public function updateSoaId(){
         $Venue = new Venue();
         $saveMany = array();
         $latitude=0;
@@ -173,16 +173,17 @@ class Soa extends Model
 
             $shapeId = $this->find('all',array(
             'conditions' => array("ST_Contains(geom, ST_GeomFromText('POINT($longitude $latitude)',4326))"),
-            'fields'=> array('County.id')
+            'fields'=> array('Soa.id')
             ));
 
             if(empty($shapeId)){
                 $saveMany[] =  array('Venue'=>array('id'=>$venueId,'soa_id'=>-1));   
             }else{
-                $saveMany[] = array('Venue' =>array('id'=>$venueId,'soa_id'=>$shapeId['County']['id']));
+                print_r($shapeId);
+                $saveMany[] = array('Venue' =>array('id'=>$venueId,'soa_id'=>$shapeId['0']['Soa']['id']));
             }
         }
-        //$Venue->saveMany($saveMany);
+        $Venue->saveMany($saveMany);
     }
 }
 ?>

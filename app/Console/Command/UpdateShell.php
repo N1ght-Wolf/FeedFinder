@@ -10,8 +10,9 @@ class UpdateShell extends AppShell {
         $this->Soa->update();
     }
 
-    public function updateVenueCounty(){
+    public function updateVenuePgId(){
         $this->County->updateCountyId();
+        $this->Soa->updateSoaId();
     }
 }
 
