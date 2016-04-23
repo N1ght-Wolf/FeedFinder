@@ -1,7 +1,7 @@
 var map;
 var markers = [];
 var markerCluster;
-var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms?';
+// var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms?';
 var choroplethMap;
 var layerMarker;
 

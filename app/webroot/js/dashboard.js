@@ -33,7 +33,7 @@ feedfinder.controller('sidebarSelectController', function ($scope, $http) {
         {name: 'Super Output Area (UK)', groupBy: 'Venue.soa_id', pg_table: 'Soa'}
     ];
 
-    $scope.selectedTime = {name: timeArr[6], range: getDateRange(timeArr[6]), attr_name: '_three_month'};
+    $scope.selectedTime = {name: timeArr[6], range:$scope.times[3].range, attr_name: '_three_month'};
     $scope.selectedCategory = {name: 'Venue', model: 'Venue'};
     $scope.selectedExplore = {name: 'County', groupBy: 'Venue.county_id', pg_table: 'County'};
 
@@ -83,11 +83,11 @@ function queryCallBack(result) {
     switch (name) {
         case 'Venue':
             displayMarkers(result.result.time_range);
-            getChoroplethMap(result.result.interq);
+            getChoroplethMap(result);
             break;
         default:
             console.log(result.result);
-            getChoroplethMap(result.result);
+            getChoroplethMap(result);
             break;
 
     }
@@ -95,7 +95,7 @@ function queryCallBack(result) {
 
 function getChoroplethMap(interq) {
     var quartiles = interq.quartiles;
-    console.log(quartiles);
+    console.log(interq);
     choroplethMap = new google.maps.ImageMapType({
         getTileUrl: function (coord, zoom) {
             var proj = map.getProjection();
@@ -113,10 +113,10 @@ function getChoroplethMap(interq) {
                 (bot.lng() + deltaX) + "," +
                 (top.lat() + deltaY);
             //base WMS URL
-            geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
+            var geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
             //geoserverUrl = "http://178.62.38.151:8080/geoserver/nurc/wms?";
-            geoserverUrl += '&env=first_q:' + quartiles[1] +
-                ';second_q:' + quartiles[2] + ';third_q:' + quartiles[3] + ';fourth_q:' + quartiles[4] + ';fifth_q:' + quartiles[5];
+             geoserverUrl += '&env=first_q:' + quartiles[1] +
+                 ';second_q:' + quartiles[2] + ';third_q:' + quartiles[3] + ';fourth_q:' + quartiles[4] + ';fifth_q:' + quartiles[5]+';property:venue_three_month';
             geoserverUrl += "&REQUEST=GetMap";
             geoserverUrl += "&SERVICE=WMS";    //WMS service
             geoserverUrl += "&VERSION=1.1.1";  //WMS version
