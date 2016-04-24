@@ -82,6 +82,9 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 <!-- <md-progress-circular md-mode="indeterminate" md-diameter="90" id='prog-element' ></md-progress-circular> -->
 
 <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+<div id="legend">
+    My first legend!
+</div>
 <div id="map">
 </div>
 

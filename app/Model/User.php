@@ -41,10 +41,9 @@ class User extends Model
             $quartile[$q] = $value['0'][$column];
             // }
         }
+        $style = "feedfinder_map_style";
 
-        $style = 'feedfinder_' . strtolower($query['category']['name']) . $query['time']['attr_name'] . '_sld';
-
-        return array('quartiles' => $quartile, 'style' => $style, 'layer' => $Model->table);
+        return array("quartiles" => $quartile, "style" => $style, "layer" => $Model->table);
     }
 
 
