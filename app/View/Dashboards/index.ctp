@@ -18,7 +18,16 @@ echo $this->Html->css('dashboard');
 echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-sidebar.css');
 
 ?>
-
+<!--<div layout="row"  style="position: absolute; z-index: 99; background-color: #ffffff;" >-->
+<!--    <md-input-container>-->
+<!--        <label>Items</label>-->
+<!--        <md-select ng-model="selectedItem" md-selected-text="getSelectedText()">-->
+<!--            <md-optgroup label="items">-->
+<!--                <md-option ng-value="item" ng-repeat="item in items">Item {{item}}</md-option>-->
+<!--            </md-optgroup>-->
+<!--        </md-select>-->
+<!--    </md-input-container>-->
+<!--</div>-->
 <div id="sidebar" class="sidebar collapsed" id="prog-element">
     <div class="sidebar-tabs">
         <ul role="tablist">

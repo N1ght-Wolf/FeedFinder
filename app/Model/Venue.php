@@ -86,8 +86,9 @@ class Venue extends Model
            // }
         }
 
-        $style = "feedfinder_" . strtolower($query["category"]["name"]) . $query["time"]["attr_name"] . "_sld";
+        //$style = "feedfinder_" . strtolower($query["category"]["name"]) . $query["time"]["attr_name"] . "_sld";
         //$style = strtolower($query["category"]["name"]) . $query["time"]["attr_name"];
+        $style = "feedfinder_map_style";
 
         return array("quartiles" => $quartile, "style" => $style, "layer" => $Model->table);
     }

@@ -80,22 +80,29 @@ feedfinder.controller('sidebarSelectController', function ($scope, $http) {
 
 function queryCallBack(result) {
     var name = result.request.category.name;
+    var quartiles, style,layer,propertyName;
     switch (name) {
         case 'Venue':
             displayMarkers(result.result.time_range);
-            getChoroplethMap(result);
+            var quartiles = result.result.interq.quartiles;
+            var style = result.result.interq.style;
+            var layer = result.result.interq.layer;
+            var propertyName = result.request.category.name.toLowerCase()+result.request.time.attr_name;
+            getChoroplethMap(quartiles,style,layer,propertyName);
             break;
         default:
             console.log(result.result);
-            getChoroplethMap(result);
+            var quartiles = result.result.quartiles;
+            var style = result.result.style;
+            var layer = result.result.layer;
+            var propertyName = result.request.category.name.toLowerCase()+result.request.time.attr_name;
+            getChoroplethMap(quartiles,style,layer,propertyName);
             break;
 
     }
 }
 
-function getChoroplethMap(interq) {
-    var quartiles = interq.quartiles;
-    console.log(interq);
+function getChoroplethMap(quartiles,style,layer,propertyName){
     choroplethMap = new google.maps.ImageMapType({
         getTileUrl: function (coord, zoom) {
             var proj = map.getProjection();
@@ -116,12 +123,13 @@ function getChoroplethMap(interq) {
             var geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
             //geoserverUrl = "http://178.62.38.151:8080/geoserver/nurc/wms?";
              geoserverUrl += '&env=first_q:' + quartiles[1] +
-                 ';second_q:' + quartiles[2] + ';third_q:' + quartiles[3] + ';fourth_q:' + quartiles[4] + ';fifth_q:' + quartiles[5]+';property:venue_three_month';
+                 ';second_q:' + quartiles[2] + ';third_q:' + quartiles[3] + ';fourth_q:' + quartiles[4] + ';fifth_q:'
+                 + quartiles[5]+';property:'+propertyName;
             geoserverUrl += "&REQUEST=GetMap";
             geoserverUrl += "&SERVICE=WMS";    //WMS service
             geoserverUrl += "&VERSION=1.1.1";  //WMS version
-            geoserverUrl += "&STYLES=" + interq.style;//WMS version
-            geoserverUrl += "&LAYERS=" + "nurc:" + interq.layer; //WMS layers
+            geoserverUrl += "&STYLES=" + style;//WMS version
+            geoserverUrl += "&LAYERS=" + "nurc:" + layer; //WMS layers
             geoserverUrl += "&FORMAT=image/png"; //WMS format
             geoserverUrl += "&TRANSPARENT=TRUE";
             geoserverUrl += "&SRS=EPSG:4326";     //set WGS84

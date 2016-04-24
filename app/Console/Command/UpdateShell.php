@@ -2,12 +2,10 @@
 class UpdateShell extends AppShell {
     public $uses = array('County','Soa');
 
-    public function updateCounty(){
-        $result = $this->County->update();
-    }
-
-    public function updateSuperOutArea(){
+    public function updatePgTables(){
+        $this->County->update();
         $this->Soa->update();
+
     }
 
     public function updateVenuePgId(){

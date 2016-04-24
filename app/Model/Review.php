@@ -18,6 +18,7 @@ class Review extends Model
         'Venue');
 
     public function route($query){
+        
         return $this->calculateInterquartile($query);
     }
 
@@ -40,10 +41,10 @@ class Review extends Model
             $quartile[$q] = $value['0'][$column];
             // }
         }
-        
-        $style='feedfinder_'.strtolower($query['category']['name']).$query['time']['attr_name'].'_sld';
 
-        return array('quartiles'=>$quartile,'style'=>$style,'layer'=>$Model->table);
+        $style = "feedfinder_map_style";
+
+        return array("quartiles" => $quartile, "style" => $style, "layer" => $Model->table);
     }
 
     public function getVenueReviews($query){
