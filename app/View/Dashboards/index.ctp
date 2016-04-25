@@ -82,7 +82,7 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
 <!-- <md-progress-circular md-mode="indeterminate" md-diameter="90" id='prog-element' ></md-progress-circular> -->
 
 <input id="pac-input" class="controls" type="text" placeholder="Search Box">
-<div id="legend">
+<div id="legend" class="round-div">
     My first legend!
 </div>
 <div id="map">
@@ -140,6 +140,30 @@ echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-si
     }
     #target {
         width: 345px;
+    }
+    #legend {
+        line-height: 20px;
+        color: #555;
+    }
+    #legend i {
+        width: 20px;
+        height: 20px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+
+    }
+    .round-div {
+        padding: 6px 8px;
+        font: 14px/16px Arial, Helvetica, sans-serif;
+        background: white;
+        background: rgba(255,255,255,0.8);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 5px;
+    }
+    .info h4 {
+        margin: 0 0 5px;
+        color: #777;
     }
 </style>
 

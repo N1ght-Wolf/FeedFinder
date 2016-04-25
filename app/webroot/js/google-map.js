@@ -7,11 +7,12 @@ var layerMarker;
 
 
 $(document).ready(function() {
-	// console.log(url(1));
-	console.log(url('hostname')+'/'+url(1)+'/venues');	
 });
 
+
+
 function initMap() {
+
 	map = new google.maps.Map(document.getElementById("map"), {
 		center: new google.maps.LatLng(54.2, -1.7),
 		zoom: 6,
@@ -23,107 +24,133 @@ function initMap() {
 		mapTypeId: google.maps.MapTypeId.TERRAIN,
 	});
 
-	map.addListener('click', function(event){
-		event.latLng.lat();
-		if(layerMarker != null){
-			layerMarker.setMap(null);
-		}
-		var pg_column = query.category.name.toLowerCase()+query.time.attr_name;
-		$.ajax({
-			type: 'GET',
-			dataType: 'json',
-			url: url()+'/map_click',
-			data:{
-				latitude:event.latLng.lat(),
-				longitude:event.latLng.lng(),
-				model:query.explore.pg_table,
-				pg_column:pg_column
-			},
-			success: function (result){
-				console.log(result);
-				var obj = result[Object.keys(result)[0]];
-				var count = obj[Object.keys(obj)[0]];
-				var infoWindow = new google.maps.InfoWindow({
-					content: count+" "+query.category.name+'s'
-				});
+    getFeatureOnClick();
+    addPlaceSearchControl();
+}
 
-			var image = {
-			    url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
-			    // This marker is 20 pixels wide by 32 pixels high.
-			    size: new google.maps.Size(20, 32),
-			    // The origin for this image is (0, 0).
-			    origin: new google.maps.Point(0, 0),
-			    // The anchor for this image is the base of the flagpole at (0, 32).
-			    anchor: new google.maps.Point(0, 32)
-			  };
+function addLegendControl(quartiles){
+    console.log(quartiles);
+    var legend = document.getElementById('legend');
+    legend.innerHTML='';
+    var choroplethColors = {1:'#fee5d9',2:'#fcae91',3:'#fb6a4a',4:'#de2d26',5:'#a50f15'};
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+    var div = document.createElement('div');
+    div.innerHTML='';
+    for (var i=1; i<=Object.keys(quartiles).length; i++){
+        div.innerHTML += '<i style="background-color:'+choroplethColors[i]+'"> </i>'+
+        quartiles[i]+' <br>';
+    }
+    legend.appendChild(div);
 
-				layerMarker = new google.maps.Marker({
-					position: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng()),
-					map: map,
-					icon: image,
-					animation: google.maps.Animation.DROP,
-				});
-				layerMarker.addListener('click', function() {
-					infoWindow.open(map, layerMarker);
-				});    
-			},
-			error: function (jqXHR, textStatus, errorThrown) {
-			}
-		});
-	});
+    // div.style.backgroundColor = "#D93600";
+   // $(legend).css("position", "relative");
 
-	var input = document.getElementById('pac-input');
-	var searchBox = new google.maps.places.SearchBox(input);
-	map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
+}
 
-	map.addListener('bounds_changed', function() {
-		searchBox.setBounds(map.getBounds());
-	});
+function addPlaceSearchControl(){
+    var input = document.getElementById('pac-input');
+    var searchBox = new google.maps.places.SearchBox(input);
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
 
-	var markers = [];
-	// Listen for the event fired when the user selects a prediction and retrieve
-	// more details for that place.
-	searchBox.addListener('places_changed', function() {
-		var places = searchBox.getPlaces();
+    map.addListener('bounds_changed', function() {
+        searchBox.setBounds(map.getBounds());
+    });
+    var markers = [];
+    // Listen for the event fired when the user selects a prediction and retrieve
+    // more details for that place.
+    searchBox.addListener('places_changed', function() {
+        var places = searchBox.getPlaces();
 
-		if (places.length == 0) {
-			return;
-		}
+        if (places.length == 0) {
+            return;
+        }
 
-		// Clear out the old markers.
-		markers.forEach(function(marker) {
-			marker.setMap(null);
-		});
-		markers = [];
+        // Clear out the old markers.
+        markers.forEach(function(marker) {
+            marker.setMap(null);
+        });
+        markers = [];
 
-		// For each place, get the icon, name and location.
-		var bounds = new google.maps.LatLngBounds();
-		places.forEach(function(place) {
-			var icon = {
-				url: place.icon,
-				size: new google.maps.Size(71, 71),
-				origin: new google.maps.Point(0, 0),
-				anchor: new google.maps.Point(17, 34),
-				scaledSize: new google.maps.Size(25, 25)
-			};
+        // For each place, get the icon, name and location.
+        var bounds = new google.maps.LatLngBounds();
+        places.forEach(function(place) {
+            var icon = {
+                url: place.icon,
+                size: new google.maps.Size(71, 71),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(25, 25)
+            };
 
-			// Create a marker for each place.
-			markers.push(new google.maps.Marker({
-				map: map,
-				icon: icon,
-				title: place.name,
-				position: place.geometry.location
-			}));
+            // Create a marker for each place.
+            markers.push(new google.maps.Marker({
+                map: map,
+                icon: icon,
+                title: place.name,
+                position: place.geometry.location
+            }));
 
-			if (place.geometry.viewport) {
-				// Only geocodes have viewport.
-				bounds.union(place.geometry.viewport);
-			} else {
-				bounds.extend(place.geometry.location);
-			}
-		});
-		map.fitBounds(bounds);
-	});
+            if (place.geometry.viewport) {
+                // Only geocodes have viewport.
+                bounds.union(place.geometry.viewport);
+            } else {
+                bounds.extend(place.geometry.location);
+            }
+        });
+        map.fitBounds(bounds);
+    });
+}
+
+function getFeatureOnClick(){
+    map.addListener('click', function(event){
+        event.latLng.lat();
+        if(layerMarker != null){
+            layerMarker.setMap(null);
+        }
+        var pg_column = query.category.name.toLowerCase()+query.time.attr_name;
+        $.ajax({
+            type: 'GET',
+            dataType: 'json',
+            url: url()+'/map_click',
+            data:{
+                latitude:event.latLng.lat(),
+                longitude:event.latLng.lng(),
+                model:query.explore.pg_table,
+                pg_column:pg_column
+            },
+            success: function (result){
+                console.log(result);
+                var obj = result[Object.keys(result)[0]];
+                var count = obj[Object.keys(obj)[0]];
+                var infoWindow = new google.maps.InfoWindow({
+                    content: count+" "+query.category.name+'s'
+                });
+
+                var image = {
+                    url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+                    // This marker is 20 pixels wide by 32 pixels high.
+                    size: new google.maps.Size(20, 32),
+                    // The origin for this image is (0, 0).
+                    origin: new google.maps.Point(0, 0),
+                    // The anchor for this image is the base of the flagpole at (0, 32).
+                    anchor: new google.maps.Point(0, 32)
+                };
+
+                layerMarker = new google.maps.Marker({
+                    position: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng()),
+                    map: map,
+                    icon: image,
+                    animation: google.maps.Animation.DROP,
+                });
+                layerMarker.addListener('click', function() {
+                    infoWindow.open(map, layerMarker);
+                });
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+    });
 }
 
 function displayMarkers(venueResult){
@@ -156,7 +183,7 @@ function deleteMarkers() {
 			markers[i].setMap(null);
 		}
 		markers = [];
-		markerCluster.clearMarkers();	
+		markerCluster.clearMarkers();
 	}
 
 }

@@ -89,6 +89,7 @@ function queryCallBack(result) {
             var layer = result.result.interq.layer;
             var propertyName = result.request.category.name.toLowerCase()+result.request.time.attr_name;
             getChoroplethMap(quartiles,style,layer,propertyName);
+            addLegendControl(quartiles);
             break;
         default:
             console.log(result.result);
@@ -97,6 +98,7 @@ function queryCallBack(result) {
             var layer = result.result.layer;
             var propertyName = result.request.category.name.toLowerCase()+result.request.time.attr_name;
             getChoroplethMap(quartiles,style,layer,propertyName);
+            addLegendControl(quartiles);
             break;
 
     }
