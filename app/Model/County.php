@@ -156,7 +156,7 @@ class County extends Model
         $column_name = $query['pg_column'];
         $result = $this->find('first',array(
             'conditions' => array("ST_Contains(geom, ST_GeomFromText('POINT($lng $lat)',4326))"),
-            'fields'=> array($column_name)
+            'fields'=> array($column_name,'name AS location_name')
             ));
         return $result;
     }

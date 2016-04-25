@@ -120,10 +120,11 @@ function getFeatureOnClick(){
             },
             success: function (result){
                 console.log(result);
-                var obj = result[Object.keys(result)[0]];
+                var obj = result[Object.keys(result)[1]];
                 var count = obj[Object.keys(obj)[0]];
+                var placeName = result[0].location_name;
                 var infoWindow = new google.maps.InfoWindow({
-                    content: count+" "+query.category.name+'s'
+                    content: count+" "+query.category.name+'(s) in '+placeName
                 });
 
                 var image = {
