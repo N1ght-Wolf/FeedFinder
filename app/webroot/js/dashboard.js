@@ -5,6 +5,9 @@ $(document).ready(function () {
    
     //.open('home');
 });
+feedfinder.controller('control',function ($scope) {
+   $scope.user ={title:'developer'};
+});
 
 feedfinder.controller('sidebarSelectController', function ($scope, $http) {
     $scope.loading = false;

@@ -31,11 +31,11 @@ function initMap() {
 function addLegendControl(quartiles){
     console.log(quartiles);
     var legend = document.getElementById('legend');
-    legend.innerHTML='';
+    // legend.innerHTML='';
+    $('#legend').empty();
     var choroplethColors = {1:'#fee5d9',2:'#fcae91',3:'#fb6a4a',4:'#de2d26',5:'#a50f15'};
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
     var div = document.createElement('div');
-    div.innerHTML='';
     for (var i=1; i<=Object.keys(quartiles).length; i++){
         div.innerHTML += '<i style="background-color:'+choroplethColors[i]+'"> </i>'+
         quartiles[i]+' <br>';

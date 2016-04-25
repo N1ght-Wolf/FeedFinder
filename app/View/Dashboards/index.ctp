@@ -7,7 +7,7 @@ echo $this->Html->script('sld', array('inline'=>false));
 echo $this->Html->script('en-gb', array('inline' => false));
 echo $this->Html->script('moment', array('inline' => false));
 echo $this->Html->script('https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js', array('inline' => false));
-echo $this->Html->script('https://rawgit.com/Turbo87/sidebar-v2/master/js/jquery-sidebar.min.js', array('inline' => false));
+echo $this->Html->script('jquery-sidebar.min.js', array('inline' => false));
 
 // my scripts
 echo $this->Html->script('dashboard', array('inline' => false));
@@ -15,20 +15,24 @@ echo $this->Html->script('google-map', array('inline' => false));
 echo $this->Html->script('markerclusterer', array('inline'=>false));
 
 echo $this->Html->css('dashboard');
-echo $this->Html->css('https://rawgit.com/Turbo87/sidebar-v2/master/css/gmaps-sidebar.css');
+echo $this->Html->css('gmaps-sidebar.css');
 
 ?>
-<!--<div layout="row"  style="position: absolute; z-index: 99; background-color: #ffffff;" >-->
-<!--    <md-input-container>-->
-<!--        <label>Items</label>-->
-<!--        <md-select ng-model="selectedItem" md-selected-text="getSelectedText()">-->
-<!--            <md-optgroup label="items">-->
-<!--                <md-option ng-value="item" ng-repeat="item in items">Item {{item}}</md-option>-->
-<!--            </md-optgroup>-->
-<!--        </md-select>-->
-<!--    </md-input-container>-->
+<!--<div ng-controller="sidebarSelectController" layout="row"  style="position: absolute; z-index: 99; background-color: #ffffff;" >-->
+<!--    <md-toolbar class="md-primary md-hue-1">-->
+<!--        <div class="md-toolbar-tools">Reviews</div>-->
+<!--    </md-toolbar>-->
+<!--    <md-content layout-padding>-->
+<!--        <md-input-container class="md-block">-->
+<!--            <label>Category</label>-->
+<!--            <md-select ng-model="selectedCategory.name">-->
+<!--                <md-option ng-value="category.name" ng-repeat="category in categories">{{ category.name }}</md-option>-->
+<!--            </md-select>-->
+<!--        </md-input-container>-->
+<!--    </md-content>-->
 <!--</div>-->
-<div id="sidebar" class="sidebar collapsed" id="prog-element">
+
+<div id="sidebar" class="sidebar collapsed">
     <div class="sidebar-tabs">
         <ul role="tablist">
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
