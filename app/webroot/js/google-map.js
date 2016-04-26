@@ -3,7 +3,7 @@ var markers = [];
 var markerCluster;
 // var geoserverUrl = 'http://localhost:8080/geoserver/cite/wms?';
 var choroplethMap;
-var layerMarker;
+var layerMarker,legend;
 
 
 $(document).ready(function() {
@@ -12,8 +12,9 @@ $(document).ready(function() {
 
 
 function initMap() {
+    legend = document.getElementById('legend');
 
-	map = new google.maps.Map(document.getElementById("map"), {
+    map = new google.maps.Map(document.getElementById("map"), {
 		center: new google.maps.LatLng(54.2, -1.7),
 		zoom: 6,
 		zoomControl: true,
@@ -23,18 +24,19 @@ function initMap() {
 		    disableDefaultUI: true,
 		mapTypeId: google.maps.MapTypeId.TERRAIN,
 	});
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+
 
     getFeatureOnClick();
     addPlaceSearchControl();
 }
 
 function addLegendControl(quartiles){
-    console.log(quartiles);
-    var legend = document.getElementById('legend');
+    console.log(map.controls);
+    // var legend = document.getElementById('legend');
     // legend.innerHTML='';
     $('#legend').empty();
     var choroplethColors = {1:'#fee5d9',2:'#fcae91',3:'#fb6a4a',4:'#de2d26',5:'#a50f15'};
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
     var div = document.createElement('div');
     for (var i=1; i<=Object.keys(quartiles).length; i++){
         div.innerHTML += '<i style="background-color:'+choroplethColors[i]+'"> </i>'+

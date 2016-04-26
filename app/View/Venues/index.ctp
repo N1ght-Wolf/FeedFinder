@@ -7,8 +7,12 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
 <div layout="row" layout-xs="column" ng-controller='VenueController' flex xmlns="http://www.w3.org/1999/html">
     <div flex="30" flex-xs="100" id="venue-info">
         <md-content>
-            <md-card>
-                <img ng-src="http://cdn.app-movement.com/apps/geolocation/uploads/medium/{{venuePhotos[0].filename}}" class="md-image" alt="Washed Out">
+            <md-card >
+                <div ng-if="venuePhotos[0].filename != null" >
+                    <img ng-src="http://cdn.app-movement.com/apps/geolocation/uploads/medium/{{venuePhotos[0].filename}}" class="md-image" alt="Washed Out">
+
+                </div>
+
                 <md-card-title>
                     <md-card-title-text>
                         <span class="md-headline">{{venueAddress.name}}</span>   <input-stars readonly="readonly" ng-model="venueRating" max="5"></input-stars>
@@ -20,7 +24,7 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
                         </span>
                     </md-card-title-text>
                 </md-card-title>
-                <md-card-content></md-card-content>
+<!--                <md-card-content></md-card-content>-->
                 <md-card-actions layout="column" layout-align="start">
                     <div layout="row" flex>
                         <div>

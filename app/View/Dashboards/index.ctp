@@ -148,6 +148,7 @@ echo $this->Html->css('gmaps-sidebar.css');
     #legend {
         line-height: 20px;
         color: #555;
+        margin-right: 8px;;
     }
     #legend i {
         width: 20px;
