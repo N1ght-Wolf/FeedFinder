@@ -4,8 +4,9 @@ class UpdateShell extends AppShell {
 
     public function updatePgTables(){
         $this->County->updateCountyId();
-        print_r("update county id in venues table");
-       // $this->Soa->updateSoaId();
+        $this->out('updated county_id in venues table.');
+        $this->Soa->updateSoaId();
+        $this->out('updated soa_id in venues table.');
         //update values in pg tables
 //        $this->County->update();
 //        $this->Soa->update();
