@@ -8,7 +8,7 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
     <div flex="30" flex-xs="100" id="venue-info">
         <md-content>
             <md-card>
-                <img ng-src="http://i.imgur.com/XQRoQYN.jpg?1" class="md-image" alt="Washed Out">
+                <img ng-src="http://cdn.app-movement.com/apps/geolocation/uploads/medium/{{venuePhotos[0].filename}}" class="md-image" alt="Washed Out">
                 <md-card-title>
                     <md-card-title-text>
                         <span class="md-headline">{{venueAddress.name}}</span>   <input-stars readonly="readonly" ng-model="venueRating" max="5"></input-stars>
@@ -35,6 +35,8 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
                     </div>
                 </md-card-actions>
             </md-card>
+
+
         </md-content>
     </div>
     <div flex="70" flex-xs="100" layout-padding id="review">

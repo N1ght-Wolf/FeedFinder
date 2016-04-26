@@ -35,8 +35,9 @@ feedfinder.controller('VenueController', function ($scope, $http) {
         }).success(function (result, status, headers, config) {
             $scope.venueAddress = result.venue_address.Venue;
             $scope.venueReviews = result.venue_reviews;
+            $scope.venuePhotos = result.venue_address.Photo;
             $scope.venueRating = result.venue_ratings[0][0].venue_rate;
-            console.log(result.venue_ratings[0][0].venue_rate);
+            console.log(result);
         }).error(function (data, status, headers, config) {
             $scope.status = status;
         });

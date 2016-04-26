@@ -14,7 +14,10 @@ class User extends Model
 {
     public $useDbConfig = 'users';
     var $name = 'User';
-    var $hasMany = 'Review';
+
+    public $hasMany = array(
+        'Review' => array('className' => 'Review'),
+        'Photo' =>array('className' => 'Photo'));
 
 
     public function route($query)

@@ -1,31 +1,25 @@
 <?php
-
-App::uses('Model', 'Model');
-App::uses('County', 'Model');
-
-
-
 /**
- * Application model for Cake.
- *
- * Add your application-wide methods in the class below, your models
- * will inherit them.
+ * Created by PhpStorm.
+ * User: DavidOyeku
+ * Date: 26/04/2016
+ * Time: 17:17
  */
-class Review extends Model
+class Photo extends Model
 {
     public $belongsTo = array(
-        'User', 
-        'Venue');
+        'User',
+        'Venue','Review');
 
-    
 
-    public function route($query){
-        
+
+    public function route($query)
+    {
         return $this->calculateInterquartile($query);
     }
 
- 
-    public function calculateInterquartile($query){
+    public function calculateInterquartile($query)
+    {
         $Model = $AnotherModel = ClassRegistry::init($query['explore']['pg_table']);
         $quartile = array("1"=>0,"2"=>0,3=>0,4=>0,5=>0);
         $category = strtolower($query['category']['name']);
@@ -43,18 +37,11 @@ class Review extends Model
             $quartile[$q] = $value['0'][$column];
             // }
         }
-
         $style = "feedfinder_map_style";
 
         return array("quartiles" => $quartile, "style" => $style, "layer" => $Model->table);
     }
 
-    public function getVenueReviews($query){
-        $id = $query['id'];
-        print_r($id);
-        return $this->find('all',array(
-            'conditions'=>array('Review.venue_id'=>$id)
-            ));
-    }
 
 }
+?>
