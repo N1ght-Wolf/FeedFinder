@@ -56,7 +56,7 @@ class DashboardsController extends AppController
                 print_r($e->getMessage());
             }
         }
-        print_r($result);
+        print_r(json_encode($result));
         $json = array("request" => $query, "result" => $result);
         echo json_encode($json);
         exit;
