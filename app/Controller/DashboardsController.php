@@ -24,7 +24,7 @@ class DashboardsController extends AppController
         //postgre geospatial tables
         'County',
         'Soa'
-        );
+    );
 
     // index page action
     public function index()
@@ -40,16 +40,26 @@ class DashboardsController extends AppController
     {
         $this->autoRender = false;
 //        if ($this->request->is('ajax')) {
-            $this->layout = null;
-            //get the sent 
-            $query = $this->request->query;
-            $model = $query['category']['model'];
-            $result = $this->$model->route($query);
+        $this->layout = null;
+        //get the sent
+        $query = $this->request->query;
+        $model = $query['category']['model'];
+        $result = $this->$model->route($query);
 
-
-            $json = array("request"=>$query, "result"=>$result);
-            echo json_encode($json);
-            exit;
+        foreach ($result['time_range'] as $key => $value) {
+//            echo "<pre>";
+//            print_r($value);
+//            echo "</pre>";
+            try {
+                echo json_encode($value);
+            } catch (Exception $e) {
+                print_r($e->getMessage());
+            }
+        }
+        print_r($result);
+        $json = array("request" => $query, "result" => $result);
+        echo json_encode($json);
+        exit;
 //        }
     }
 
@@ -62,8 +72,8 @@ class DashboardsController extends AppController
             $query = $this->request->query;
             $model = $query['model'];
             $result = $this->$model->getFeatureInfo($query);
-            if(empty($result)){
-                $result = array($query['model']=>array($query['pg_column'] => 0));
+            if (empty($result)) {
+                $result = array($query['model'] => array($query['pg_column'] => 0));
             }
             echo json_encode($result);
             exit;
