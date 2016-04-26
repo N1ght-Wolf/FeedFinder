@@ -125,8 +125,8 @@ function getChoroplethMap(quartiles,style,layer,propertyName){
                 (bot.lng() + deltaX) + "," +
                 (top.lat() + deltaY);
             //base WMS URL
-            var geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
-            //geoserverUrl = "http://178.62.38.151:8080/geoserver/nurc/wms?";
+            //var geoserverUrl = "http://localhost:8080/geoserver/cite/wms?";
+            geoserverUrl = "http://178.62.38.151:8080/geoserver/nurc/wms?";
              geoserverUrl += '&env=first_q:' + quartiles[1] +
                  ';second_q:' + quartiles[2] + ';third_q:' + quartiles[3] + ';fourth_q:' + quartiles[4] + ';fifth_q:'
                  + quartiles[5]+';property:'+propertyName;
