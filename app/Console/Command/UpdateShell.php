@@ -3,8 +3,8 @@ class UpdateShell extends AppShell {
     public $uses = array('County','Soa');
 
     public function updatePgTables(){
-        $this->County->updateCountyId();
-        $this->Soa->updateSoaId();
+        //$this->County->updateCountyId();
+       // $this->Soa->updateSoaId();
         //update values in pg tables
 //        $this->County->update();
 //        $this->Soa->update();
