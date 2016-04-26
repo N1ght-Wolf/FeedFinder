@@ -32,7 +32,6 @@ class Venue extends Model
     public function getVenuesInTimeRange($query)
     {
         $this->Behaviors->load('Containable');
-        $this->contain();
         $from = $query['time']['range']['from'];
         //$to = $query['time']['range']['to'];
         //print_r(date('Y-m-d H:i:s', strtotime($from)));
