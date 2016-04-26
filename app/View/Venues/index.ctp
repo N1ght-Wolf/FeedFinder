@@ -23,7 +23,6 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
                 <md-card-content></md-card-content>
                 <md-card-actions layout="column" layout-align="start">
                     <div layout="row" flex>
-
                         <div>
                             <md-subheader class="md-no-sticky">From</md-subheader>
                             <md-datepicker ng-model="fromDate" md-placeholder="From Date"></md-datepicker>
@@ -40,7 +39,10 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
     </div>
     <div flex="70" flex-xs="100" layout-padding id="review">
         <md-toolbar class="md-primary md-hue-1">
-            <div class="md-toolbar-tools">Reviews</div>
+
+            <div class="md-toolbar-tools" layout="row flex">
+                <h2> {{venueReviews.length}} Review(s)</h2>
+            </div>
         </md-toolbar>
         <md-content class="md-whiteframe-z1" style="height: 600px;">
             <md-list-item class="md-3-line " ng-repeat="review in venueReviews" ng-click="null">
@@ -59,24 +61,5 @@ echo $this->Html->css('https://rawgit.com/melloc01/angular-input-stars/master/an
 
 
 <style>
-
-    .my-custom-stars .button .material-icons {
-        font-size: 15px;
-    }
-
-    /*.my-custom-stars .star-button.star-on .material-icons {*/
-    /*color: #003399;*/
-    /*}*/
-
-    /*.my-custom-stars .star-button.star-off .material-icons {*/
-    /*color: #99ccff;*/
-    /*}*/
-    #venue-info {
-        /*background-color: #9E2424;*/
-    }
-
-    #review {
-        /*background-color: #003d4c;*/
-    }
 
 </style>
