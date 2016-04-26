@@ -40,7 +40,7 @@ class County extends Model
         'friendliness_six_month'=>'-6 month today','friendliness_this_year'=>'January this year'
         );
 
-    public function update(){
+    public function updateColumns(){
         $this->updateReview();
         $this->updateVenue();
         $this->updateUser();

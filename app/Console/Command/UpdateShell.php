@@ -1,21 +1,22 @@
 <?php
-class UpdateShell extends AppShell {
-    public $uses = array('County','Soa');
+class UpdateShell extends AppShell
+{
+    public $uses = array('County', 'Soa');
 
-    public function updatePgTables(){
+    public function updatePgTables()
+    {
         $this->County->updateCountyId();
-        $this->out('updated county_id in venues table.');
+        $this->out('updated county_id in venues table...');
         $this->Soa->updateSoaId();
-        $this->out('updated soa_id in venues table.');
+        $this->out('updated soa_id in venues table...');
+
+
         //update values in pg tables
-//        $this->County->update();
-//        $this->Soa->update();
+        $this->County->updateColumns();
+        $this->out('updated the county column values...');
+        $this->Soa->updateColumns();
+        $this->out('updated the soa column values...');
 
-    }
-
-    public function updateVenuePgId(){
-        $this->County->updateCountyId();
-        $this->Soa->updateSoaId();
     }
 }
 
