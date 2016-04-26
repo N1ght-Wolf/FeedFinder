@@ -6,8 +6,8 @@ class UpdateShell extends AppShell {
         $this->County->updateCountyId();
         $this->Soa->updateSoaId();
         //update values in pg tables
-        $this->County->update();
-        $this->Soa->update();
+//        $this->County->update();
+//        $this->Soa->update();
 
     }
 
