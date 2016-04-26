@@ -46,17 +46,6 @@ class DashboardsController extends AppController
         $model = $query['category']['model'];
         $result = $this->$model->route($query);
 
-        foreach ($result['time_range'] as $key => $value) {
-//            echo "<pre>";
-//            print_r($value);
-//            echo "</pre>";
-            try {
-                echo json_encode($value);
-            } catch (Exception $e) {
-                print_r($e->getMessage());
-            }
-        }
-        print_r(json_encode($result));
         $json = array("request" => $query, "result" => $result);
         echo json_encode($json);
         exit;
